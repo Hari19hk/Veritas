@@ -53,22 +53,58 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
 }
 
 const CreateCommitment = () => {
-  const [taskIdentifier, setTaskIdentifier] = useState('');
-  const [missionBrief, setMissionBrief] = useState('');
+  const [taskName, setTaskName] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [priority, setPriority] = useState<'LOW' | 'MED' | 'HIGH'>('MED');
   const [mapCenter, setMapCenter] = useState<[number, number]>([34.0522, -118.2437]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCommit = () => {
-    // Handle commit logic here
-    console.log('Committing task:', {
-      taskIdentifier,
-      missionBrief,
-      startTime,
-      endTime,
-      priority
-    });
+  const handleCommit = async () => {
+    if (!taskName || !startTime || !endTime) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const payload = {
+      taskName,
+      location: {
+        lat: mapCenter[0],
+        lng: mapCenter[1]
+      },
+      timeWindow: {
+        start: new Date(startTime).toISOString(),
+        end: new Date(endTime).toISOString()
+      }
+    };
+
+    try {
+      const response = await fetch('http://localhost:8080/commit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Commitment Created! ID: ${data.commitmentId}`);
+        // Reset form
+        setTaskName('');
+        setStartTime('');
+        setEndTime('');
+      } else {
+        alert(`Error: ${data.error || 'Failed to create commitment'}`);
+      }
+    } catch (error) {
+      console.error('Error creating commitment:', error);
+      alert('Network error. Is the backend running?');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -152,27 +188,15 @@ const CreateCommitment = () => {
             </div>
 
             <div className="form-content">
-              {/* Task Identifier */}
+              {/* Task Name */}
               <div className="form-group">
-                <label className="form-label">TASK IDENTIFIER</label>
+                <label className="form-label">TASK NAME</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="# e.g., SECTOR_4_PATROL_ALPHA"
-                  value={taskIdentifier}
-                  onChange={(e) => setTaskIdentifier(e.target.value)}
-                />
-              </div>
-
-              {/* Mission Brief */}
-              <div className="form-group">
-                <label className="form-label">MISSION BRIEF</label>
-                <textarea
-                  className="form-textarea"
-                  placeholder="Describe the operational parameters and constraints for this execution unit..."
-                  value={missionBrief}
-                  onChange={(e) => setMissionBrief(e.target.value)}
-                  rows={6}
+                  placeholder="e.g., Medicine Delivery"
+                  value={taskName}
+                  onChange={(e) => setTaskName(e.target.value)}
                 />
               </div>
 
@@ -183,9 +207,8 @@ const CreateCommitment = () => {
                   <div className="time-input-wrapper">
                     <Calendar size={16} className="time-icon" />
                     <input
-                      type="text"
+                      type="datetime-local"
                       className="form-input time-input"
-                      placeholder="mm/dd/yyyy, --:--"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
                     />
@@ -196,38 +219,12 @@ const CreateCommitment = () => {
                   <div className="time-input-wrapper">
                     <Clock size={16} className="time-icon" />
                     <input
-                      type="text"
+                      type="datetime-local"
                       className="form-input time-input"
-                      placeholder="mm/dd/yyyy, --:--"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Priority Level */}
-              <div className="form-group">
-                <label className="form-label">PRIORITY LEVEL</label>
-                <div className="priority-buttons">
-                  <button
-                    className={`priority-btn ${priority === 'LOW' ? 'active' : ''}`}
-                    onClick={() => setPriority('LOW')}
-                  >
-                    LOW
-                  </button>
-                  <button
-                    className={`priority-btn ${priority === 'MED' ? 'active' : ''}`}
-                    onClick={() => setPriority('MED')}
-                  >
-                    MED
-                  </button>
-                  <button
-                    className={`priority-btn ${priority === 'HIGH' ? 'active' : ''}`}
-                    onClick={() => setPriority('HIGH')}
-                  >
-                    HIGH
-                  </button>
                 </div>
               </div>
 
@@ -241,9 +238,9 @@ const CreateCommitment = () => {
               </div>
 
               {/* Commit Button */}
-              <button className="commit-btn" onClick={handleCommit}>
+              <button className="commit-btn" onClick={handleCommit} disabled={isSubmitting}>
                 <Rocket size={18} />
-                COMMIT TASK
+                {isSubmitting ? 'COMMITTING...' : 'COMMIT TASK'}
               </button>
             </div>
           </div>
