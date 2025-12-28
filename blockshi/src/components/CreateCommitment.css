@@ -9,10 +9,20 @@
   align-items: flex-start;
   margin-bottom: 32px;
   gap: 24px;
+  position: relative;
 }
 
 .header-content {
   flex: 1;
+  text-align: center;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.system-status {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .commitment-title {
@@ -23,6 +33,7 @@
   font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  text-align: center;
 }
 
 .commitment-description {
@@ -31,6 +42,8 @@
   line-height: 1.6;
   font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
   max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .system-status {
@@ -285,39 +298,6 @@
   padding-left: 36px;
 }
 
-/* Priority Buttons */
-.priority-buttons {
-  display: flex;
-  gap: 12px;
-}
-
-.priority-btn {
-  flex: 1;
-  padding: 10px 16px;
-  background-color: #0a0a0a;
-  border: 1px solid #1f1f1f;
-  border-radius: 4px;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.priority-btn:hover {
-  border-color: #10b981;
-  background-color: #1a1a1a;
-}
-
-.priority-btn.active {
-  background-color: #10b981;
-  border-color: #10b981;
-  color: #ffffff;
-}
-
 /* Warning Box */
 .warning-box {
   display: flex;
@@ -372,6 +352,151 @@
 
 .commit-btn:active {
   transform: translateY(0);
+}
+
+/* Error States */
+.form-input.error,
+.form-textarea.error {
+  border-color: #ef4444;
+}
+
+.error-message {
+  font-size: 11px;
+  color: #ef4444;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  margin-top: 4px;
+}
+
+.commit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Success Modal */
+.success-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.success-modal {
+  background-color: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.success-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.success-icon {
+  color: #10b981;
+  margin-bottom: 8px;
+}
+
+.success-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.success-message {
+  font-size: 14px;
+  color: #9ca3af;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  line-height: 1.6;
+}
+
+.commitment-details {
+  width: 100%;
+  background-color: #0a0a0a;
+  border: 1px solid #1f1f1f;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 8px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #9ca3af;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: #ffffff;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-weight: 600;
+  word-break: break-all;
+  text-align: right;
+}
+
+.detail-value.hash {
+  color: #10b981;
+}
+
+.redirect-message {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-style: italic;
+  margin-top: 8px;
 }
 
 /* Responsive */

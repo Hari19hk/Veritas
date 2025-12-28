@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Target,
   MapPin,
@@ -8,14 +8,15 @@ import {
   Upload,
   FileText,
   X,
-  Rocket,
-  CheckCircle2
+  Rocket
 } from 'lucide-react';
 import Layout from './Layout';
 import './ExecuteTask.css';
 
 const ExecuteTask = () => {
   const [locationInput, setLocationInput] = useState('');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; size: string; time: string }>>([
     { name: 'site_photo_01.jpg', size: '2.4 MB', time: 'Just now' }
   ]);
@@ -52,16 +53,61 @@ const ExecuteTask = () => {
     setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
   };
 
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Geocoding function to convert location name to coordinates
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (!locationInput.trim()) {
+      setCoordinates(null);
+      return;
+    }
+
+    setIsSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        // Using OpenStreetMap Nominatim API for geocoding
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationInput)}&limit=1`
+        );
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          setCoordinates({ lat, lng: lon });
+        } else {
+          setCoordinates(null);
+        }
+      } catch (error) {
+        console.error('Geocoding error:', error);
+        setCoordinates(null);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [locationInput]);
+
   const handleSubmit = () => {
     console.log('Submitting execution:', {
       locationInput,
+      coordinates,
       uploadedFiles,
       operatorNotes
     });
   };
 
   return (
-    <Layout breadcrumb="tasks / task #4092-ax">
+    <Layout breadcrumb="execute task">
       <div className="execute-task-page">
         {/* Page Header */}
         <div className="execute-header">
@@ -99,10 +145,13 @@ const ExecuteTask = () => {
                     <input
                       type="text"
                       className="location-input"
-                      placeholder="Enter coordinates (Lat, Long) or Location ID"
+                      placeholder="Enter location name (e.g., Los Angeles, CA)"
                       value={locationInput}
                       onChange={(e) => setLocationInput(e.target.value)}
                     />
+                    {isSearching && (
+                      <span className="searching-indicator">Searching...</span>
+                    )}
                   </div>
                   <div className="info-text">
                     <Info size={14} className="info-icon" />
@@ -119,7 +168,11 @@ const ExecuteTask = () => {
                 <div className="card-content">
                   <div className="coordinate-display">
                     <Target size={16} className="coordinate-icon" />
-                    <span className="coordinate-text">---.--° N, ---.--° W</span>
+                    <span className="coordinate-text">
+                      {coordinates
+                        ? `${coordinates.lat >= 0 ? coordinates.lat.toFixed(4) + '° N' : Math.abs(coordinates.lat).toFixed(4) + '° S'}, ${coordinates.lng >= 0 ? coordinates.lng.toFixed(4) + '° E' : Math.abs(coordinates.lng).toFixed(4) + '° W'}`
+                        : '---.--° N, ---.--° W'}
+                    </span>
                   </div>
                 </div>
               </div>

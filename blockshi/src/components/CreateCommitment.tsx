@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   MapPin,
   Rocket,
@@ -6,7 +7,9 @@ import {
   Target,
   Layers,
   Calendar,
-  Clock
+  Clock,
+  CheckCircle2,
+  X
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -53,58 +56,123 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
 }
 
 const CreateCommitment = () => {
-  const [taskName, setTaskName] = useState('');
+  const navigate = useNavigate();
+  const [taskIdentifier, setTaskIdentifier] = useState('');
+  const [missionBrief, setMissionBrief] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [mapCenter, setMapCenter] = useState<[number, number]>([34.0522, -118.2437]);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [commitmentData, setCommitmentData] = useState<{
+    commitmentId: string;
+    proofHash: string;
+    timestamp: string;
+  } | null>(null);
+
+  // Generate a random commitment ID
+  const generateCommitmentId = () => {
+    const prefix = 'CID';
+    const random1 = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const random2 = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${prefix}-${random1}-${random2}-V2`;
+  };
+
+  // Generate a proof hash (simulated)
+  const generateProofHash = () => {
+    const chars = '0123456789abcdef';
+    let hash = '0x';
+    for (let i = 0; i < 64; i++) {
+      hash += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return hash;
+  };
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!taskIdentifier.trim()) {
+      newErrors.taskIdentifier = 'Task identifier is required';
+    } else if (!taskIdentifier.startsWith('#')) {
+      newErrors.taskIdentifier = 'Task identifier must start with #';
+    }
+
+    if (!missionBrief.trim()) {
+      newErrors.missionBrief = 'Mission brief is required';
+    } else if (missionBrief.trim().length < 20) {
+      newErrors.missionBrief = 'Mission brief must be at least 20 characters';
+    }
+
+    if (!startTime.trim()) {
+      newErrors.startTime = 'Start time is required';
+    }
+
+    if (!endTime.trim()) {
+      newErrors.endTime = 'End time is required';
+    }
+
+    // Validate date format (basic check)
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}$/;
+    if (startTime && !dateRegex.test(startTime)) {
+      newErrors.startTime = 'Format: mm/dd/yyyy, HH:MM';
+    }
+    if (endTime && !dateRegex.test(endTime)) {
+      newErrors.endTime = 'Format: mm/dd/yyyy, HH:MM';
+    }
+
+    // Check if end time is after start time
+    if (startTime && endTime && dateRegex.test(startTime) && dateRegex.test(endTime)) {
+      const start = new Date(startTime.replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2})/, '$3-$1-$2T$4:$5'));
+      const end = new Date(endTime.replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2})/, '$3-$1-$2T$4:$5'));
+      if (end <= start) {
+        newErrors.endTime = 'End time must be after start time';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleCommit = async () => {
-    if (!taskName || !startTime || !endTime) {
-      alert('Please fill in all fields');
+    if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
 
-    const payload = {
-      taskName,
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Generate commitment data
+    const commitmentId = generateCommitmentId();
+    const proofHash = generateProofHash();
+    const timestamp = new Date().toISOString();
+
+    const data = {
+      commitmentId,
+      proofHash,
+      timestamp,
+      taskIdentifier,
+      missionBrief,
+      startTime,
+      endTime,
       location: {
         lat: mapCenter[0],
         lng: mapCenter[1]
-      },
-      timeWindow: {
-        start: new Date(startTime).toISOString(),
-        end: new Date(endTime).toISOString()
       }
     };
 
-    try {
-      const response = await fetch('http://localhost:8080/commit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
+    setCommitmentData({ commitmentId, proofHash, timestamp });
 
-      const data = await response.json();
+    // Store in localStorage for demo purposes
+    localStorage.setItem('lastCommitment', JSON.stringify(data));
 
-      if (response.ok) {
-        alert(`Commitment Created! ID: ${data.commitmentId}`);
-        // Reset form
-        setTaskName('');
-        setStartTime('');
-        setEndTime('');
-      } else {
-        alert(`Error: ${data.error || 'Failed to create commitment'}`);
-      }
-    } catch (error) {
-      console.error('Error creating commitment:', error);
-      alert('Network error. Is the backend running?');
-    } finally {
-      setIsSubmitting(false);
-    }
+    setIsSubmitting(false);
+
+    // Navigate to proof page after 2 seconds
+    setTimeout(() => {
+      navigate('/proof-of-execution');
+    }, 2000);
   };
 
   return (
@@ -188,16 +256,44 @@ const CreateCommitment = () => {
             </div>
 
             <div className="form-content">
-              {/* Task Name */}
+              {/* Task Identifier */}
               <div className="form-group">
-                <label className="form-label">TASK NAME</label>
+                <label className="form-label">TASK IDENTIFIER</label>
                 <input
                   type="text"
-                  className="form-input"
-                  placeholder="e.g., Medicine Delivery"
-                  value={taskName}
-                  onChange={(e) => setTaskName(e.target.value)}
+                  className={`form-input ${errors.taskIdentifier ? 'error' : ''}`}
+                  placeholder="# e.g., SECTOR_4_PATROL_ALPHA"
+                  value={taskIdentifier}
+                  onChange={(e) => {
+                    setTaskIdentifier(e.target.value);
+                    if (errors.taskIdentifier) {
+                      setErrors({ ...errors, taskIdentifier: '' });
+                    }
+                  }}
                 />
+                {errors.taskIdentifier && (
+                  <span className="error-message">{errors.taskIdentifier}</span>
+                )}
+              </div>
+
+              {/* Mission Brief */}
+              <div className="form-group">
+                <label className="form-label">MISSION BRIEF</label>
+                <textarea
+                  className={`form-textarea ${errors.missionBrief ? 'error' : ''}`}
+                  placeholder="Describe the operational parameters and constraints for this execution unit..."
+                  value={missionBrief}
+                  onChange={(e) => {
+                    setMissionBrief(e.target.value);
+                    if (errors.missionBrief) {
+                      setErrors({ ...errors, missionBrief: '' });
+                    }
+                  }}
+                  rows={6}
+                />
+                {errors.missionBrief && (
+                  <span className="error-message">{errors.missionBrief}</span>
+                )}
               </div>
 
               {/* Time Fields */}
@@ -207,24 +303,42 @@ const CreateCommitment = () => {
                   <div className="time-input-wrapper">
                     <Calendar size={16} className="time-icon" />
                     <input
-                      type="datetime-local"
-                      className="form-input time-input"
+                      type="text"
+                      className={`form-input time-input ${errors.startTime ? 'error' : ''}`}
+                      placeholder="mm/dd/yyyy, HH:MM"
                       value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
+                      onChange={(e) => {
+                        setStartTime(e.target.value);
+                        if (errors.startTime) {
+                          setErrors({ ...errors, startTime: '' });
+                        }
+                      }}
                     />
                   </div>
+                  {errors.startTime && (
+                    <span className="error-message">{errors.startTime}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="form-label">END TIME</label>
                   <div className="time-input-wrapper">
                     <Clock size={16} className="time-icon" />
                     <input
-                      type="datetime-local"
-                      className="form-input time-input"
+                      type="text"
+                      className={`form-input time-input ${errors.endTime ? 'error' : ''}`}
+                      placeholder="mm/dd/yyyy, HH:MM"
                       value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
+                      onChange={(e) => {
+                        setEndTime(e.target.value);
+                        if (errors.endTime) {
+                          setErrors({ ...errors, endTime: '' });
+                        }
+                      }}
                     />
                   </div>
+                  {errors.endTime && (
+                    <span className="error-message">{errors.endTime}</span>
+                  )}
                 </div>
               </div>
 
@@ -238,13 +352,55 @@ const CreateCommitment = () => {
               </div>
 
               {/* Commit Button */}
-              <button className="commit-btn" onClick={handleCommit} disabled={isSubmitting}>
+              <button 
+                className="commit-btn" 
+                onClick={handleCommit}
+                disabled={isSubmitting}
+              >
                 <Rocket size={18} />
                 {isSubmitting ? 'COMMITTING...' : 'COMMIT TASK'}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Success Modal */}
+        {commitmentData && (
+          <div className="success-modal-overlay" onClick={() => setCommitmentData(null)}>
+            <div className="success-modal" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className="modal-close"
+                onClick={() => setCommitmentData(null)}
+              >
+                <X size={20} />
+              </button>
+              <div className="success-content">
+                <CheckCircle2 size={64} className="success-icon" />
+                <h2 className="success-title">COMMITMENT CREATED</h2>
+                <p className="success-message">
+                  Your execution commitment has been cryptographically signed and stored on the ledger.
+                </p>
+                <div className="commitment-details">
+                  <div className="detail-row">
+                    <span className="detail-label">Commitment ID:</span>
+                    <span className="detail-value">{commitmentData.commitmentId}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Proof Hash:</span>
+                    <span className="detail-value hash">{commitmentData.proofHash.substring(0, 20)}...</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Timestamp:</span>
+                    <span className="detail-value">
+                      {new Date(commitmentData.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+                <p className="redirect-message">Redirecting to proof page...</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

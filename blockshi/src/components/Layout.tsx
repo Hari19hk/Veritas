@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Plus,
   Play,
   ShieldCheck,
+  FileCheck,
   CheckCircle2,
   Lock,
   Search,
-  Bell,
-  Settings,
   User,
   ChevronLeft,
   ChevronRight
@@ -23,9 +22,41 @@ interface LayoutProps {
 
 const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Search functionality
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = searchQuery.toLowerCase().trim();
+    
+    if (!query) return;
+
+    // Search mappings
+    const searchMap: { [key: string]: string } = {
+      'dashboard': '/',
+      'create': '/create-commitment',
+      'commitment': '/create-commitment',
+      'execute': '/execute-task',
+      'task': '/execute-task',
+      'proof': '/proof-of-execution',
+      'execution': '/proof-of-execution',
+      'verify': '/verify-execution-proof',
+      'verification': '/verify-execution-proof',
+    };
+
+    // Check for matches
+    for (const [keyword, path] of Object.entries(searchMap)) {
+      if (query.includes(keyword)) {
+        navigate(path);
+        setSearchQuery('');
+        return;
+      }
+    }
+  };
 
   return (
     <div className="dashboard-container">
@@ -36,13 +67,13 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
             <div className="logo-icon">
               <span className="logo-ai-text">AI</span>
             </div>
-            <h1 className="logo-text">AI CONSOLE</h1>
+            <h1 className="logo-text">CONSOLE</h1>
           </div>
           <div className="breadcrumb">
             <span>console</span>
             <span className="breadcrumb-separator">/</span>
             {breadcrumb.includes(' / ') ? (
-              breadcrumb.split(' / ').map((part, index, array) => (
+              breadcrumb.split(' / ').map((part, index) => (
                 <span key={index}>
                   {index > 0 && <span className="breadcrumb-separator">/</span>}
                   <span className={index === 0 ? 'breadcrumb-highlight' : ''}>{part}</span>
@@ -54,34 +85,20 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
           </div>
         </div>
         <div className="header-center">
-          <div className="search-bar">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Search trace ID or commit hash..."
-              className="search-input"
-            />
-          </div>
+          <form onSubmit={handleSearch} style={{ width: '100%' }}>
+            <div className="search-bar">
+              <Search size={18} />
+              <input
+                type="text"
+                placeholder="Search trace ID or commit hash..."
+                className="search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </form>
         </div>
         <div className="header-right">
-          <nav className="header-nav">
-            <Link to="/" className={`header-nav-link ${isActive('/') ? 'active' : ''}`}>
-              Dashboard
-            </Link>
-            <Link to="/execute-task" className={`header-nav-link ${isActive('/execute-task') ? 'active' : ''}`}>
-              Tasks
-            </Link>
-            <Link to="/logs" className={`header-nav-link ${isActive('/logs') ? 'active' : ''}`}>
-              Logs
-            </Link>
-            <Link to="/settings" className={`header-nav-link ${isActive('/settings') ? 'active' : ''}`}>
-              Settings
-            </Link>
-          </nav>
-          <div className="header-icons">
-            <Bell size={20} className="header-icon" />
-            <Settings size={20} className="header-icon" />
-          </div>
           <div className="user-info">
             <div className="user-details">
               <span className="user-label">Executor</span>
@@ -89,13 +106,10 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
             </div>
             <User size={18} className="user-icon" />
           </div>
-          <div className="sync-info">
-            <span className="sync-text">Last synced: 240ms ago</span>
-          </div>
         </div>
       </header>
 
-      <div className="dashboard-content-wrapper">
+      <div className={`dashboard-content-wrapper ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         {/* Sidebar */}
         <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <button
@@ -130,11 +144,18 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
               {!sidebarCollapsed && <span>Execute Task</span>}
             </Link>
             <Link
-              to="/verify-proof"
-              className={`nav-item ${isActive('/verify-proof') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
+              to="/proof-of-execution"
+              className={`nav-item ${isActive('/proof-of-execution') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
+            >
+              <FileCheck size={20} />
+              {!sidebarCollapsed && <span>Proof of Execution</span>}
+            </Link>
+            <Link
+              to="/verify-execution-proof"
+              className={`nav-item ${isActive('/verify-execution-proof') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
             >
               <ShieldCheck size={20} />
-              {!sidebarCollapsed && <span>Verify Proof</span>}
+              {!sidebarCollapsed && <span>Verify execution proof</span>}
             </Link>
           </nav>
 

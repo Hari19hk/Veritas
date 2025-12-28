@@ -1,0 +1,355 @@
+.proof-page {
+  padding: 0;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* System Status Header */
+.system-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 8px 16px;
+  background-color: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 6px;
+  width: fit-content;
+  margin-left: auto;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.system-status-header .status-text {
+  font-size: 12px;
+  color: #ffffff;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Centered Content Container */
+.centered-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  background-color: #10b981;
+  border-radius: 20px;
+  padding: 6px 16px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.badge-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+}
+
+/* Execution ID */
+.execution-id {
+  font-size: 18px;
+  font-weight: 600;
+  color: #9ca3af;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  text-align: center;
+}
+
+/* Page Header */
+.proof-header {
+  margin-bottom: 48px;
+  text-align: center;
+}
+
+.proof-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 16px;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.proof-subtitle {
+  font-size: 14px;
+  color: #9ca3af;
+  line-height: 1.6;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Proof Status Section */
+.proof-status-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 48px;
+  padding: 32px 0;
+}
+
+.status-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  max-width: 280px;
+}
+
+.status-icon-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon-large {
+  color: #10b981;
+}
+
+.status-check {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  color: #10b981;
+  background-color: #0a0a0a;
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.status-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+}
+
+.status-subtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+}
+
+/* Status Connector */
+.status-connector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  height: 4px;
+}
+
+.connector-line {
+  width: 100%;
+  height: 2px;
+  background-color: #1f1f1f;
+  position: relative;
+}
+
+.connector-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Proof Details Section */
+.proof-details-section {
+  margin-bottom: 32px;
+}
+
+.details-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.details-icon {
+  color: #10b981;
+}
+
+.details-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.proof-details-box {
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #ffffff;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.hash-value {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.format-badge {
+  display: inline-block;
+  background-color: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10b981;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #10b981;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Proof Actions */
+.proof-actions {
+  margin-bottom: 32px;
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background-color: #10b981;
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.copy-btn:active {
+  transform: translateY(0);
+}
+
+/* Footer */
+.proof-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 24px;
+  border-top: 1px solid #1f1f1f;
+}
+
+.footer-icon {
+  color: #6b7280;
+}
+
+.footer-text {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .proof-status-section {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .status-connector {
+    width: 4px;
+    height: 60px;
+    min-width: 4px;
+  }
+
+  .connector-line {
+    width: 2px;
+    height: 100%;
+  }
+
+  .connector-dot {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
