@@ -5,7 +5,7 @@ import './Dashboard.css'; // Reusing dashboard styles for consistency
 
 interface Commitment {
   commitmentId: string;
-  proofHash: string;
+  proofHash?: string; // Optional since backend doesn't return it
   timestamp: string;
   taskIdentifier: string;
   missionBrief: string;
@@ -90,10 +90,17 @@ const Logs = () => {
                       </div>
                     </td>
                     <td>
-                      <div className="task-path" style={{ fontFamily: 'monospace', color: '#6b7280' }}>
-                        <Hash size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
-                        {item.proofHash.substring(0, 16)}...
-                      </div>
+                      {item.proofHash ? (
+                        <div className="task-path" style={{ fontFamily: 'monospace', color: '#6b7280' }}>
+                          <Hash size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
+                          {item.proofHash.substring(0, 16)}...
+                        </div>
+                      ) : (
+                        <div className="task-path" style={{ fontFamily: 'monospace', color: '#6b7280' }}>
+                          <Hash size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
+                          N/A
+                        </div>
+                      )}
                     </td>
                     <td>
                       <div style={{ fontSize: '12px', color: '#9ca3af' }}>

@@ -15,6 +15,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Layout from './Layout';
 import './CreateCommitment.css';
+import { createCommitment } from '../utils/api';
 
 // Fix for default marker icons in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -66,27 +67,9 @@ const CreateCommitment = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [commitmentData, setCommitmentData] = useState<{
     commitmentId: string;
-    proofHash: string;
     timestamp: string;
   } | null>(null);
-
-  // Generate a random commitment ID
-  const generateCommitmentId = () => {
-    const prefix = 'CID';
-    const random1 = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    const random2 = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${prefix}-${random1}-${random2}-V2`;
-  };
-
-  // Generate a proof hash (simulated)
-  const generateProofHash = () => {
-    const chars = '0123456789abcdef';
-    let hash = '0x';
-    for (let i = 0; i < 64; i++) {
-      hash += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return hash;
-  };
+  const [apiError, setApiError] = useState<string | null>(null);
 
   // Handle coordinate input changes and update map
   const handleLatitudeChange = (value: string) => {
@@ -193,6 +176,16 @@ const CreateCommitment = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Convert date format from "mm/dd/yyyy, HH:MM" to ISO string
+  const convertToISO = (dateString: string): string => {
+    const match = dateString.match(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2})/);
+    if (!match) {
+      throw new Error('Invalid date format');
+    }
+    const [, month, day, year, hour, minute] = match;
+    return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).toISOString();
+  };
+
   const handleCommit = async () => {
     if (!validateForm()) {
       return;
@@ -206,42 +199,68 @@ const CreateCommitment = () => {
     }
 
     setIsSubmitting(true);
+    setApiError(null);
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      // Use validated coordinates
+      const finalLat = parseFloat(latitudeInput);
+      const finalLng = parseFloat(longitudeInput);
 
-    // Generate commitment data
-    const commitmentId = generateCommitmentId();
-    const proofHash = generateProofHash();
-    const timestamp = new Date().toISOString();
+      // Convert dates to ISO format
+      const startISO = convertToISO(startTime);
+      const endISO = convertToISO(endTime);
 
-    // Use validated coordinates
-    const finalLat = parseFloat(latitudeInput);
-    const finalLng = parseFloat(longitudeInput);
+      // Combine taskIdentifier and missionBrief for taskName
+      const taskName = `${taskIdentifier} - ${missionBrief}`;
 
-    const data = {
-      commitmentId,
-      proofHash,
-      timestamp,
-      taskIdentifier,
-      missionBrief,
-      startTime,
-      endTime,
-      location: {
-        lat: finalLat,
-        lng: finalLng
-      }
-    };
+      // Prepare request data
+      const requestData = {
+        taskName,
+        location: {
+          lat: finalLat,
+          lng: finalLng,
+        },
+        timeWindow: {
+          start: startISO,
+          end: endISO,
+        },
+      };
 
-    setCommitmentData({ commitmentId, proofHash, timestamp });
+      console.log('[CreateCommitment] Making API call with data:', requestData);
 
-    // Store in localStorage
-    const storedCommitments = localStorage.getItem('commitments');
-    const commitments = storedCommitments ? JSON.parse(storedCommitments) : [];
-    commitments.unshift(data); // Add to beginning
-    localStorage.setItem('commitments', JSON.stringify(commitments));
+      // Call backend API
+      const response = await createCommitment(requestData);
 
-    setIsSubmitting(false);
+      console.log('[CreateCommitment] API call successful, response:', response);
+
+      // Set success data
+      setCommitmentData({
+        commitmentId: response.commitmentId,
+        timestamp: response.data.createdAt,
+      });
+
+      // Store in localStorage for backward compatibility
+      const storedCommitments = localStorage.getItem('commitments');
+      const commitments = storedCommitments ? JSON.parse(storedCommitments) : [];
+      commitments.unshift({
+        commitmentId: response.commitmentId,
+        taskIdentifier,
+        missionBrief,
+        startTime,
+        endTime,
+        location: {
+          lat: finalLat,
+          lng: finalLng,
+        },
+        timestamp: response.data.createdAt,
+      });
+      localStorage.setItem('commitments', JSON.stringify(commitments));
+    } catch (error) {
+      console.error('Error creating commitment:', error);
+      setApiError(error instanceof Error ? error.message : 'Failed to create commitment');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -439,6 +458,16 @@ const CreateCommitment = () => {
                 </div>
               </div>
 
+              {/* API Error Display */}
+              {apiError && (
+                <div className="warning-box" style={{ backgroundColor: '#7f1d1d', borderColor: '#991b1b' }}>
+                  <AlertTriangle size={18} className="warning-icon" />
+                  <p className="warning-text" style={{ color: '#fca5a5' }}>
+                    {apiError}
+                  </p>
+                </div>
+              )}
+
               {/* Warning Box */}
               <div className="warning-box">
                 <AlertTriangle size={18} className="warning-icon" />
@@ -483,10 +512,6 @@ const CreateCommitment = () => {
                     <span className="detail-value">{commitmentData.commitmentId}</span>
                   </div>
                   <div className="detail-row">
-                    <span className="detail-label">Proof Hash:</span>
-                    <span className="detail-value hash">{commitmentData.proofHash.substring(0, 20)}...</span>
-                  </div>
-                  <div className="detail-row">
                     <span className="detail-label">Timestamp:</span>
                     <span className="detail-value">
                       {new Date(commitmentData.timestamp).toLocaleString()}
@@ -503,4 +528,5 @@ const CreateCommitment = () => {
 };
 
 export default CreateCommitment;
+
 

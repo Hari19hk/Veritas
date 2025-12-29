@@ -8,19 +8,27 @@ import {
   Upload,
   FileText,
   X,
-  Rocket
+  Rocket,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import Layout from './Layout';
 import './ExecuteTask.css';
+import { executeTask, hashFiles, getAllCommitments } from '../utils/api';
 
 interface Commitment {
   commitmentId: string;
-  proofHash: string;
+  proofHash?: string;
   timestamp: string;
-  taskIdentifier: string;
-  missionBrief: string;
-  startTime: string;
-  endTime: string;
+  taskIdentifier?: string;
+  missionBrief?: string;
+  taskName?: string; // Backend uses taskName instead of taskIdentifier + missionBrief
+  startTime?: string;
+  endTime?: string;
+  timeWindow?: {
+    start: string;
+    end: string;
+  };
   location: {
     lat: number;
     lng: number;
@@ -30,35 +38,123 @@ interface Commitment {
 const ExecuteTask = () => {
   const [locationInput, setLocationInput] = useState('');
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [latitudeInput, setLatitudeInput] = useState('');
+  const [longitudeInput, setLongitudeInput] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; size: string; time: string }>>([
-    { name: 'site_photo_01.jpg', size: '2.4 MB', time: 'Just now' }
-  ]);
+  const [coordinateErrors, setCoordinateErrors] = useState<{ latitude?: string; longitude?: string }>({});
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ file: File; name: string; size: string; time: string }>>([]);
   const [operatorNotes, setOperatorNotes] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [commitments, setCommitments] = useState<Commitment[]>([]);
   const [selectedCommitmentId, setSelectedCommitmentId] = useState<string>('');
+  const [executionTime, setExecutionTime] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [executionResult, setExecutionResult] = useState<{
+    poeHash: string;
+    timestamp: string;
+  } | null>(null);
 
-  // Load commitments from localStorage
+  // Load commitments from backend API
   useEffect(() => {
+    const loadCommitments = async () => {
+      try {
+        console.log('[ExecuteTask] Fetching commitments from backend...');
+        const backendCommitments = await getAllCommitments();
+        console.log('[ExecuteTask] Received commitments from backend:', backendCommitments);
+        
+        // Transform backend format to match frontend format
+        const transformedCommitments = backendCommitments.map(commitment => ({
+          commitmentId: commitment.commitmentId,
+          timestamp: commitment.createdAt,
+          taskName: commitment.taskName,
+          location: commitment.location,
+          timeWindow: commitment.timeWindow,
+          // For display purposes, split taskName if needed
+          taskIdentifier: commitment.taskName.split(' - ')[0] || commitment.taskName,
+          missionBrief: commitment.taskName.split(' - ').slice(1).join(' - ') || '',
+          startTime: new Date(commitment.timeWindow.start).toLocaleString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          }).replace(',', ''),
+          endTime: new Date(commitment.timeWindow.end).toLocaleString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          }).replace(',', ''),
+        }));
+        
+        setCommitments(transformedCommitments);
+        
+        // Set first commitment as default if available and none selected
+        if (transformedCommitments.length > 0) {
+          const firstCommitment = transformedCommitments[0];
+          setSelectedCommitmentId(prev => {
+            if (!prev) {
+              // Set default execution time to current time if within window, otherwise start time
+              const now = new Date();
+              const start = new Date(firstCommitment.timeWindow.start);
+              const end = new Date(firstCommitment.timeWindow.end);
+              if (now >= start && now <= end) {
+                setExecutionTime(now.toISOString().slice(0, 16));
+              } else {
+                setExecutionTime(start.toISOString().slice(0, 16));
+              }
+              return firstCommitment.commitmentId;
+            }
+            return prev;
+          });
+        }
+      } catch (error) {
+        console.error('[ExecuteTask] Failed to fetch commitments from backend:', error);
+        // Fallback to localStorage if backend fails
     const storedCommitments = localStorage.getItem('commitments');
     if (storedCommitments) {
       try {
         const parsed = JSON.parse(storedCommitments);
         setCommitments(parsed);
-        // Set first commitment as default if available
-        if (parsed.length > 0 && !selectedCommitmentId) {
-          setSelectedCommitmentId(parsed[0].commitmentId);
+            if (parsed.length > 0) {
+              setSelectedCommitmentId(prev => prev || parsed[0].commitmentId);
+            }
+          } catch (e) {
+            console.error('[ExecuteTask] Failed to parse localStorage commitments', e);
+          }
         }
-      } catch (e) {
-        console.error('Failed to parse commitments', e);
+      }
+    };
+
+    loadCommitments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update execution time when selected commitment changes
+  useEffect(() => {
+    if (selectedCommitmentId && commitments.length > 0) {
+      const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
+      if (selectedCommitment && selectedCommitment.timeWindow && !executionTime) {
+        const now = new Date();
+        const start = new Date(selectedCommitment.timeWindow.start);
+        const end = new Date(selectedCommitment.timeWindow.end);
+        if (now >= start && now <= end) {
+          setExecutionTime(now.toISOString().slice(0, 16));
+        } else {
+          setExecutionTime(start.toISOString().slice(0, 16));
+        }
       }
     }
-  }, []);
+  }, [selectedCommitmentId, commitments, executionTime]);
 
   const handleFileUpload = (files: FileList | null) => {
     if (files && files.length > 0) {
       const newFiles = Array.from(files).map(file => ({
+        file,
         name: file.name,
         size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
         time: 'Just now'
@@ -112,6 +208,9 @@ const ExecuteTask = () => {
           const lat = parseFloat(data[0].lat);
           const lon = parseFloat(data[0].lon);
           setCoordinates({ lat, lng: lon });
+          // Update manual coordinate inputs
+          setLatitudeInput(lat.toFixed(4));
+          setLongitudeInput(lon.toFixed(4));
         } else {
           setCoordinates(null);
         }
@@ -130,13 +229,173 @@ const ExecuteTask = () => {
     };
   }, [locationInput]);
 
-  const handleSubmit = () => {
-    console.log('Submitting execution:', {
-      locationInput,
-      coordinates,
-      uploadedFiles,
-      operatorNotes
-    });
+  // Handle manual coordinate input changes
+  const handleLatitudeChange = (value: string) => {
+    setLatitudeInput(value);
+    const lat = parseFloat(value);
+    if (!isNaN(lat) && lat >= -90 && lat <= 90) {
+      setCoordinates({ lat, lng: coordinates?.lng || 0 });
+      if (coordinateErrors.latitude) {
+        setCoordinateErrors({ ...coordinateErrors, latitude: undefined });
+      }
+    } else if (value.trim() !== '') {
+      setCoordinateErrors({ ...coordinateErrors, latitude: 'Latitude must be between -90 and 90' });
+    }
+  };
+
+  const handleLongitudeChange = (value: string) => {
+    setLongitudeInput(value);
+    const lng = parseFloat(value);
+    if (!isNaN(lng) && lng >= -180 && lng <= 180) {
+      setCoordinates({ lat: coordinates?.lat || 0, lng });
+      if (coordinateErrors.longitude) {
+        setCoordinateErrors({ ...coordinateErrors, longitude: undefined });
+      }
+    } else if (value.trim() !== '') {
+      setCoordinateErrors({ ...coordinateErrors, longitude: 'Longitude must be between -180 and 180' });
+    }
+  };
+
+  const handleLatitudeBlur = () => {
+    const lat = parseFloat(latitudeInput);
+    if (!isNaN(lat) && lat >= -90 && lat <= 90) {
+      setLatitudeInput(lat.toFixed(4));
+      setCoordinates({ lat, lng: coordinates?.lng || 0 });
+    } else if (latitudeInput.trim() === '') {
+      if (coordinates) {
+        setLatitudeInput(coordinates.lat.toFixed(4));
+      }
+    }
+  };
+
+  const handleLongitudeBlur = () => {
+    const lng = parseFloat(longitudeInput);
+    if (!isNaN(lng) && lng >= -180 && lng <= 180) {
+      setLongitudeInput(lng.toFixed(4));
+      setCoordinates({ lat: coordinates?.lat || 0, lng });
+    } else if (longitudeInput.trim() === '') {
+      if (coordinates) {
+        setLongitudeInput(coordinates.lng.toFixed(4));
+      }
+    }
+  };
+
+  // Update manual inputs when coordinates change from geocoding
+  useEffect(() => {
+    if (coordinates) {
+      setLatitudeInput(coordinates.lat.toFixed(4));
+      setLongitudeInput(coordinates.lng.toFixed(4));
+    }
+  }, [coordinates]);
+
+  const handleSubmit = async () => {
+    // Validation
+    if (!selectedCommitmentId) {
+      setApiError('Please select a commitment');
+      return;
+    }
+
+
+    if (!executionTime) {
+      setApiError('Please enter an execution time');
+      return;
+    }
+
+    // Validate execution time is within time window
+    const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
+    if (selectedCommitment && selectedCommitment.timeWindow) {
+      const execTime = new Date(executionTime);
+      const startTime = new Date(selectedCommitment.timeWindow.start);
+      const endTime = new Date(selectedCommitment.timeWindow.end);
+      
+      if (execTime < startTime || execTime > endTime) {
+        setApiError(`Execution time must be between ${startTime.toLocaleString()} and ${endTime.toLocaleString()}`);
+        return;
+      }
+    }
+
+    // Determine final coordinates (from geocoding or manual entry)
+    let finalCoordinates = coordinates;
+    
+    // If no coordinates but manual inputs exist, try to use them
+    if (!finalCoordinates && latitudeInput && longitudeInput) {
+      const lat = parseFloat(latitudeInput);
+      const lng = parseFloat(longitudeInput);
+      if (!isNaN(lat) && lat >= -90 && lat <= 90 && !isNaN(lng) && lng >= -180 && lng <= 180) {
+        finalCoordinates = { lat, lng };
+      }
+    }
+
+    if (!finalCoordinates) {
+      setApiError('Please enter a valid location (either search by name or enter coordinates manually)');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setApiError(null);
+    setExecutionResult(null);
+
+    try {
+      console.log('[ExecuteTask] Starting execution submission');
+      console.log('[ExecuteTask] Selected commitment:', selectedCommitmentId);
+      console.log('[ExecuteTask] Coordinates:', finalCoordinates);
+      console.log('[ExecuteTask] Execution time:', executionTime);
+      console.log('[ExecuteTask] Uploaded files:', uploadedFiles.length);
+
+      // Hash files if any are uploaded
+      let evidenceFileHash: string | undefined;
+      if (uploadedFiles.length > 0) {
+        const files = uploadedFiles.map(f => f.file);
+        evidenceFileHash = await hashFiles(files);
+        console.log('[ExecuteTask] Evidence file hash:', evidenceFileHash);
+      }
+
+      // Convert datetime-local to ISO string
+      const executionTimeISO = new Date(executionTime).toISOString();
+
+      // Use finalCoordinates (from geocoding or manual entry)
+      const finalLat = finalCoordinates.lat;
+      const finalLng = finalCoordinates.lng;
+
+      // Prepare request data
+      const requestData = {
+        commitmentId: selectedCommitmentId,
+        executionLocation: {
+          lat: finalLat,
+          lng: finalLng,
+        },
+        executionTime: executionTimeISO,
+        ...(evidenceFileHash && { evidenceFileHash }),
+      };
+
+      console.log('[ExecuteTask] Making API call with data:', requestData);
+
+      // Call backend API
+      const response = await executeTask(requestData);
+
+      console.log('[ExecuteTask] API call successful, response:', response);
+
+      // Set success result
+      setExecutionResult({
+        poeHash: response.poeHash,
+        timestamp: response.data.createdAt,
+      });
+
+      // Clear form
+      setLocationInput('');
+      setCoordinates(null);
+      setLatitudeInput('');
+      setLongitudeInput('');
+      setUploadedFiles([]);
+      setOperatorNotes('');
+      setExecutionTime('');
+      setCoordinateErrors({});
+    } catch (error) {
+      console.error('[ExecuteTask] Error executing task:', error);
+      setApiError(error instanceof Error ? error.message : 'Failed to execute task');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -151,7 +410,24 @@ const ExecuteTask = () => {
               <select
                 className="commitment-select"
                 value={selectedCommitmentId}
-                onChange={(e) => setSelectedCommitmentId(e.target.value)}
+                onChange={(e) => {
+                  const newCommitmentId = e.target.value;
+                  setSelectedCommitmentId(newCommitmentId);
+                  // Update execution time when commitment changes
+                  if (newCommitmentId) {
+                    const selectedCommitment = commitments.find(c => c.commitmentId === newCommitmentId);
+                    if (selectedCommitment && selectedCommitment.timeWindow) {
+                      const now = new Date();
+                      const start = new Date(selectedCommitment.timeWindow.start);
+                      const end = new Date(selectedCommitment.timeWindow.end);
+                      if (now >= start && now <= end) {
+                        setExecutionTime(now.toISOString().slice(0, 16));
+                      } else {
+                        setExecutionTime(start.toISOString().slice(0, 16));
+                      }
+                    }
+                  }
+                }}
               >
                 {commitments.length === 0 ? (
                   <option value="">No commitments available</option>
@@ -206,6 +482,70 @@ const ExecuteTask = () => {
                 </div>
               </div>
 
+              {/* Manual Coordinate Entry */}
+              <div className="info-card">
+                <div className="card-header">
+                  <h3 className="card-title">MANUAL COORDINATE ENTRY</h3>
+                </div>
+                <div className="card-content">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', display: 'block' }}>LATITUDE</label>
+                      <div className="input-wrapper">
+                        <Target size={16} className="input-icon" />
+                        <input
+                          type="text"
+                          className={`location-input ${coordinateErrors.latitude ? 'error' : ''}`}
+                          placeholder="e.g., 34.0522"
+                          value={latitudeInput}
+                          onChange={(e) => handleLatitudeChange(e.target.value)}
+                          onBlur={handleLatitudeBlur}
+                        />
+                        {coordinates && (
+                          <span style={{ fontSize: '11px', color: '#6b7280', marginLeft: '4px' }}>
+                            {coordinates.lat >= 0 ? 'N' : 'S'}
+                          </span>
+                        )}
+                      </div>
+                      {coordinateErrors.latitude && (
+                        <span style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px', display: 'block' }}>
+                          {coordinateErrors.latitude}
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ color: '#6b7280', marginTop: '20px' }}>/</span>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', display: 'block' }}>LONGITUDE</label>
+                      <div className="input-wrapper">
+                        <Target size={16} className="input-icon" />
+                        <input
+                          type="text"
+                          className={`location-input ${coordinateErrors.longitude ? 'error' : ''}`}
+                          placeholder="e.g., -118.2437"
+                          value={longitudeInput}
+                          onChange={(e) => handleLongitudeChange(e.target.value)}
+                          onBlur={handleLongitudeBlur}
+                        />
+                        {coordinates && (
+                          <span style={{ fontSize: '11px', color: '#6b7280', marginLeft: '4px' }}>
+                            {coordinates.lng >= 0 ? 'E' : 'W'}
+                          </span>
+                        )}
+                      </div>
+                      {coordinateErrors.longitude && (
+                        <span style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px', display: 'block' }}>
+                          {coordinateErrors.longitude}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="info-text">
+                    <Info size={14} className="info-icon" />
+                    <span>Enter coordinates manually or use location search above.</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Current Coordinate */}
               <div className="info-card">
                 <div className="card-header">
@@ -255,9 +595,75 @@ const ExecuteTask = () => {
                   <h3 className="card-title">Time Window</h3>
                 </div>
                 <div className="card-content">
+                  {selectedCommitmentId && (() => {
+                    const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
+                    if (selectedCommitment && selectedCommitment.timeWindow) {
+                      const start = new Date(selectedCommitment.timeWindow.start);
+                      const end = new Date(selectedCommitment.timeWindow.end);
+                      const now = new Date();
+                      const isActive = now >= start && now <= end;
+                      const timeLeft = end.getTime() - now.getTime();
+                      const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+                      const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                      
+                      return (
+                        <div className="status-display">
+                          <Clock size={16} className="status-icon" />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <span className={`status-text ${isActive ? 'active' : 'pending'}`}>
+                              {isActive ? `ACTIVE ${hoursLeft}:${minutesLeft.toString().padStart(2, '0')} left` : 'INACTIVE'}
+                            </span>
+                            <span style={{ fontSize: '11px', color: '#9ca3af' }}>
+                              {start.toLocaleString()} - {end.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
                   <div className="status-display">
                     <Clock size={16} className="status-icon" />
-                    <span className="status-text active">ACTIVE 04:22 left</span>
+                        <span className="status-text pending">SELECT COMMITMENT</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Execution Time */}
+              <div className="info-card">
+                <div className="card-header">
+                  <h3 className="card-title">EXECUTION TIME</h3>
+                </div>
+                <div className="card-content">
+                  <div className="input-wrapper">
+                    <Clock size={16} className="input-icon" />
+                    <input
+                      type="datetime-local"
+                      className="location-input"
+                      value={executionTime}
+                      onChange={(e) => setExecutionTime(e.target.value)}
+                      min={selectedCommitmentId ? (() => {
+                        const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
+                        if (selectedCommitment && selectedCommitment.timeWindow) {
+                          const start = new Date(selectedCommitment.timeWindow.start);
+                          return start.toISOString().slice(0, 16);
+                        }
+                        return '';
+                      })() : ''}
+                      max={selectedCommitmentId ? (() => {
+                        const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
+                        if (selectedCommitment && selectedCommitment.timeWindow) {
+                          const end = new Date(selectedCommitment.timeWindow.end);
+                          return end.toISOString().slice(0, 16);
+                        }
+                        return '';
+                      })() : ''}
+                    />
+                  </div>
+                  <div className="info-text">
+                    <Info size={14} className="info-icon" />
+                    <span>Execution time must be within the committed time window.</span>
                   </div>
                 </div>
               </div>
@@ -329,10 +735,24 @@ const ExecuteTask = () => {
                 />
               </div>
 
+              {/* API Error Display */}
+              {apiError && (
+                <div className="warning-box" style={{ backgroundColor: '#7f1d1d', borderColor: '#991b1b', marginBottom: '16px' }}>
+                  <AlertTriangle size={18} className="warning-icon" />
+                  <p className="warning-text" style={{ color: '#fca5a5' }}>
+                    {apiError}
+                  </p>
+                </div>
+              )}
+
               {/* Submit Button */}
-              <button className="submit-btn" onClick={handleSubmit}>
+              <button 
+                className="submit-btn" 
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
                 <Rocket size={18} />
-                SUBMIT EXECUTION
+                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT EXECUTION'}
               </button>
 
               {/* Cancel Link */}
@@ -343,6 +763,39 @@ const ExecuteTask = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {executionResult && (
+        <div className="success-modal-overlay" onClick={() => setExecutionResult(null)}>
+          <div className="success-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close"
+              onClick={() => setExecutionResult(null)}
+            >
+              <X size={20} />
+            </button>
+            <div className="success-content">
+              <CheckCircle2 size={64} className="success-icon" />
+              <h2 className="success-title">EXECUTION SUBMITTED</h2>
+              <p className="success-message">
+                Your task execution has been verified and proof has been generated.
+              </p>
+              <div className="commitment-details">
+                <div className="detail-row">
+                  <span className="detail-label">Proof Hash:</span>
+                  <span className="detail-value hash">{executionResult.poeHash.substring(0, 20)}...</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Timestamp:</span>
+                  <span className="detail-value">
+                    {new Date(executionResult.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
