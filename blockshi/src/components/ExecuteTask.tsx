@@ -13,6 +13,20 @@ import {
 import Layout from './Layout';
 import './ExecuteTask.css';
 
+interface Commitment {
+  commitmentId: string;
+  proofHash: string;
+  timestamp: string;
+  taskIdentifier: string;
+  missionBrief: string;
+  startTime: string;
+  endTime: string;
+  location: {
+    lat: number;
+    lng: number;
+  };
+}
+
 const ExecuteTask = () => {
   const [locationInput, setLocationInput] = useState('');
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
@@ -22,6 +36,25 @@ const ExecuteTask = () => {
   ]);
   const [operatorNotes, setOperatorNotes] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [commitments, setCommitments] = useState<Commitment[]>([]);
+  const [selectedCommitmentId, setSelectedCommitmentId] = useState<string>('');
+
+  // Load commitments from localStorage
+  useEffect(() => {
+    const storedCommitments = localStorage.getItem('commitments');
+    if (storedCommitments) {
+      try {
+        const parsed = JSON.parse(storedCommitments);
+        setCommitments(parsed);
+        // Set first commitment as default if available
+        if (parsed.length > 0 && !selectedCommitmentId) {
+          setSelectedCommitmentId(parsed[0].commitmentId);
+        }
+      } catch (e) {
+        console.error('Failed to parse commitments', e);
+      }
+    }
+  }, []);
 
   const handleFileUpload = (files: FileList | null) => {
     if (files && files.length > 0) {
@@ -114,9 +147,22 @@ const ExecuteTask = () => {
           <div className="header-content">
             <h1 className="execute-title">EXECUTE TASK</h1>
             <div className="task-info">
-              <span className="task-id">ID: COMMIT-8821</span>
-              <span className="info-separator">|</span>
-              <span className="task-priority">PRIORITY: HIGH</span>
+              <label className="task-id-label">ID:</label>
+              <select
+                className="commitment-select"
+                value={selectedCommitmentId}
+                onChange={(e) => setSelectedCommitmentId(e.target.value)}
+              >
+                {commitments.length === 0 ? (
+                  <option value="">No commitments available</option>
+                ) : (
+                  commitments.map((commitment) => (
+                    <option key={commitment.commitmentId} value={commitment.commitmentId}>
+                      {commitment.commitmentId}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
           </div>
           <div className="session-info">

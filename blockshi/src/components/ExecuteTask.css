@@ -33,18 +33,40 @@
   font-family: 'Inter', sans-serif;
 }
 
-.task-id {
+.task-id-label {
+  color: #ffffff;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.commitment-select {
+  padding: 6px 12px;
+  background-color: #0a0a0a;
+  border: 1px solid #1f1f1f;
+  border-radius: 4px;
   color: #10b981;
+  font-size: 13px;
   font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 200px;
 }
 
-.info-separator {
-  color: #6b7280;
+.commitment-select:hover {
+  border-color: #10b981;
 }
 
-.task-priority {
-  color: #ef4444;
-  font-weight: 600;
+.commitment-select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+}
+
+.commitment-select option {
+  background-color: #111111;
+  color: #10b981;
+  padding: 8px;
 }
 
 .session-info {
