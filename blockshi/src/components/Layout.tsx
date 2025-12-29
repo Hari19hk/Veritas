@@ -11,7 +11,9 @@ import {
   Search,
   User,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Bell,
+  Settings
 } from 'lucide-react';
 import './Dashboard.css';
 
@@ -32,7 +34,7 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const query = searchQuery.toLowerCase().trim();
-    
+
     if (!query) return;
 
     // Search mappings
@@ -99,6 +101,15 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
           </form>
         </div>
         <div className="header-right">
+          <div className="header-icons">
+            <button className="icon-btn">
+              <Bell size={20} />
+              <span className="notification-dot"></span>
+            </button>
+            <button className="icon-btn">
+              <Settings size={20} />
+            </button>
+          </div>
           <div className="user-info">
             <div className="user-details">
               <span className="user-label">Executor</span>
@@ -118,7 +129,7 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
           >
             {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
-          
+
           <nav className="sidebar-nav">
             <Link
               to="/"

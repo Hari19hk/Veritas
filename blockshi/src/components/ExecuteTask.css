@@ -20,7 +20,7 @@
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 12px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -30,7 +30,7 @@
   align-items: center;
   gap: 12px;
   font-size: 13px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .task-id {
@@ -55,7 +55,7 @@
 .session-text {
   font-size: 12px;
   color: #9ca3af;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Two Column Layout */
@@ -94,7 +94,7 @@
   font-size: 16px;
   font-weight: 700;
   color: #ffffff;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -124,7 +124,7 @@
   color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .card-content {
@@ -146,7 +146,7 @@
   right: 12px;
   font-size: 11px;
   color: #10b981;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'JetBrains Mono', monospace;
   pointer-events: none;
 }
 
@@ -166,7 +166,7 @@
   padding: 10px 12px 10px 36px;
   color: #e5e7eb;
   font-size: 13px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'JetBrains Mono', monospace;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -186,7 +186,7 @@
   gap: 6px;
   font-size: 12px;
   color: #9ca3af;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .info-icon {
@@ -212,7 +212,7 @@
 .geofence-text {
   font-size: 13px;
   color: #e5e7eb;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 /* Status Display */
@@ -230,7 +230,7 @@
 .status-text {
   font-size: 13px;
   font-weight: 600;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .status-text.pending {
@@ -282,14 +282,14 @@
   font-size: 14px;
   color: #e5e7eb;
   margin-bottom: 6px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
 }
 
 .upload-formats {
   font-size: 12px;
   color: #6b7280;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .file-input-hidden {
@@ -328,14 +328,14 @@
 .file-name {
   font-size: 13px;
   color: #e5e7eb;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
 }
 
 .file-meta {
   font-size: 11px;
   color: #6b7280;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .file-remove {
@@ -369,7 +369,7 @@
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .form-textarea {
@@ -379,7 +379,7 @@
   padding: 10px 12px;
   color: #e5e7eb;
   font-size: 13px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'JetBrains Mono', monospace;
   outline: none;
   transition: border-color 0.2s;
   resize: vertical;
@@ -402,22 +402,22 @@
   justify-content: center;
   gap: 10px;
   padding: 14px 24px;
-  background-color: #10b981;
+  background-color: #4ADE80;
   border: none;
-  border-radius: 6px;
-  color: #ffffff;
+  border-radius: 2px;
+  color: #000000;
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'JetBrains Mono', monospace;
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 8px;
 }
 
 .submit-btn:hover {
-  background-color: #059669;
+  background-color: #22c55e;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
@@ -432,7 +432,7 @@
   font-size: 12px;
   color: #6b7280;
   text-decoration: none;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   transition: color 0.2s;
   margin-top: 8px;
 }
@@ -447,4 +447,3 @@
     grid-template-columns: 1fr;
   }
 }
-

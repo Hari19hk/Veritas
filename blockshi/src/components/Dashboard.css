@@ -8,7 +8,7 @@
   min-height: 100vh;
   background-color: #0a0a0a;
   color: #e5e7eb;
-  font-family: 'Courier New', 'Monaco', 'Menlo', 'Consolas', 'Liberation Mono', 'Courier', monospace;
+  font-family: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
   letter-spacing: 0.02em;
@@ -57,15 +57,16 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .logo-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.5px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
 }
 
 .breadcrumb {
@@ -74,7 +75,7 @@
   gap: 8px;
   font-size: 13px;
   color: #9ca3af;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   text-transform: lowercase;
 }
 
@@ -99,10 +100,11 @@
   align-items: center;
   background-color: #1a1a1a;
   border: 1px solid #2d2d2d;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 8px 12px;
   width: 100%;
   gap: 8px;
+  height: 40px;
 }
 
 .search-bar svg {
@@ -117,7 +119,7 @@
   color: #e5e7eb;
   font-size: 13px;
   width: 100%;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .search-input::placeholder {
@@ -130,8 +132,45 @@
   gap: 16px;
   flex: 1;
   justify-content: flex-end;
+  border-left: 1px solid #1f1f1f;
+  padding-left: 24px;
+  height: 32px;
 }
 
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-right: 24px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.icon-btn:hover {
+  color: #e5e7eb;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+  border: 1px solid #111111;
+}
 
 .user-info {
   display: flex;
@@ -149,13 +188,13 @@
 .user-label {
   font-size: 13px;
   color: #9ca3af;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .user-role {
   font-size: 12px;
   color: #6b7280;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .user-icon {
@@ -233,7 +272,7 @@
   transition: all 0.2s;
   color: #9ca3af;
   font-size: 14px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
   text-decoration: none;
 }
@@ -244,8 +283,11 @@
 }
 
 .nav-item.active {
-  background-color: #10b981;
-  color: #ffffff;
+  background-color: #1a1a1a;
+  color: #10b981;
+  border-left: 3px solid #10b981;
+  border-radius: 0;
+  padding-left: 15px;
 }
 
 .dashboard-icon-wrapper {
@@ -280,7 +322,7 @@
   gap: 10px;
   font-size: 12px;
   color: #9ca3af;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .status-item.collapsed {
@@ -305,7 +347,7 @@
   font-size: 10px;
   color: #6b7280;
   text-align: center;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'JetBrains Mono', monospace;
   letter-spacing: 0.5px;
 }
 
@@ -331,6 +373,19 @@
 
 .content-header {
   margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.last-synced {
+  font-size: 11px;
+  color: #6b7280;
+  background-color: #1a1a1a;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid #1f1f1f;
 }
 
 .page-title {
@@ -338,14 +393,14 @@
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 8px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   letter-spacing: -0.01em;
 }
 
 .page-subtitle {
   font-size: 14px;
   color: #9ca3af;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Summary Cards */
@@ -441,7 +496,7 @@
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 8px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'JetBrains Mono', monospace;
   letter-spacing: -0.02em;
 }
 
@@ -451,7 +506,7 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: 12px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
 }
 
@@ -461,7 +516,7 @@
   gap: 6px;
   color: #10b981;
   font-size: 12px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
 }
 
@@ -473,7 +528,7 @@
   color: #f59e0b;
   font-size: 13px;
   margin-top: 8px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Commitments Section */
@@ -492,7 +547,7 @@
   font-size: 18px;
   font-weight: 600;
   color: #ffffff;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   letter-spacing: -0.01em;
 }
 
@@ -525,7 +580,7 @@
 }
 
 .commitments-table thead {
-  background-color: #1a1a1a;
+  background-color: transparent;
   border-bottom: 1px solid #1f1f1f;
 }
 
@@ -537,7 +592,7 @@
   color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .commitments-table tbody tr {
@@ -557,17 +612,19 @@
   padding: 16px;
   font-size: 13px;
   color: #e5e7eb;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .task-id {
   display: inline-block;
   background-color: #1a1a1a;
   padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-  color: #9ca3af;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #e5e7eb;
+  border: 1px solid #1f1f1f;
+  font-weight: 500;
 }
 
 .task-name {
@@ -579,13 +636,13 @@
 .task-name-text {
   color: #ffffff;
   font-weight: 500;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .task-path {
   font-size: 12px;
   color: #6b7280;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .status-badge {
@@ -595,24 +652,28 @@
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
 
 .view-link {
   background: transparent;
   border: none;
-  color: #3b82f6;
+  color: #9ca3af;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0;
   transition: color 0.2s;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-weight: 500;
+}
+
+.view-link svg {
+  display: none;
 }
 
 .view-link:hover {
@@ -622,19 +683,23 @@
 .execute-btn {
   background-color: #10b981;
   border: none;
-  color: #ffffff;
-  padding: 6px 14px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
+  color: #000000;
+  padding: 4px 12px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
   transition: background-color 0.2s;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.execute-btn svg {
+  display: none;
 }
 
 .execute-btn:hover {
@@ -653,7 +718,7 @@
 .pagination-info {
   font-size: 12px;
   color: #9ca3af;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
 }
 
 .pagination-controls {
@@ -675,7 +740,7 @@
   cursor: pointer;
   transition: all 0.2s;
   font-size: 12px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
 }
 
@@ -705,7 +770,7 @@
 
 .log-command code {
   color: #9ca3af;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .logs-container {
@@ -713,7 +778,7 @@
   border: 1px solid #1f1f1f;
   border-radius: 8px;
   padding: 16px;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   max-height: 300px;
   overflow-y: auto;
@@ -758,4 +823,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #3d3d3d;
 }
-
