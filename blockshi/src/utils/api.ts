@@ -247,3 +247,87 @@ export const getCommitmentById = async (commitmentId: string): Promise<Commitmen
   }
 };
 
+export interface Proof {
+  poeHash: string;
+  commitmentId: string;
+  executionLocation: {
+    lat: number;
+    lng: number;
+  };
+  executionTime: string;
+  status: string;
+  createdAt: string;
+  blockchainTx?: string;
+}
+
+/**
+ * Gets a proof by poeHash from the backend API
+ */
+export const getProofByHash = async (poeHash: string): Promise<Proof> => {
+  const timestamp = new Date().toISOString();
+  
+  console.log(`[${timestamp}] API Call: GET ${API_BASE_URL}/proofs/${poeHash}`);
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/proofs/${poeHash}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error(`[${new Date().toISOString()}] API Error:`, error);
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    
+    console.log(`[${new Date().toISOString()}] API Response: Success`);
+    console.log('Proof:', JSON.stringify(responseData, null, 2));
+    
+    return responseData;
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Gets all proofs from the backend API
+ */
+export const getAllProofs = async (): Promise<Proof[]> => {
+  const timestamp = new Date().toISOString();
+  
+  console.log(`[${timestamp}] API Call: GET ${API_BASE_URL}/proofs`);
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/proofs`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error(`[${new Date().toISOString()}] API Error:`, error);
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    
+    console.log(`[${new Date().toISOString()}] API Response: Success (${responseData.length} proofs)`);
+    console.log('Proofs:', JSON.stringify(responseData, null, 2));
+    
+    return responseData;
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
+    throw error;
+  }
+};
+
+// Explicit type re-export for compatibility
+export type { Proof };
+
