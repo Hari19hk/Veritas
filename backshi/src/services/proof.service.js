@@ -10,14 +10,13 @@ const ALLOWED_RADIUS_METERS = 200; // MVP constraint
  * @param {string} data.commitmentId
  * @param {object} data.executionLocation { lat, lng }
  * @param {string} data.executionTime
- * @param {string} data.evidenceFileHash
  * @returns {object} Proof data
  */
 const executeTask = (data) => {
-  const { commitmentId, executionLocation, executionTime, evidenceFileHash } = data;
+  const { commitmentId, executionLocation, executionTime } = data;
 
   // 1. Validate Input
-  if (!commitmentId || !executionLocation || !executionTime || !evidenceFileHash) {
+  if (!commitmentId || !executionLocation || !executionTime) {
     throw new Error('Missing required fields');
   }
 
@@ -49,14 +48,12 @@ const executeTask = (data) => {
   }
 
   // 5. Generate PoE Hash
-  // SHA256(commitmentId + executionTime + executionLocation + evidenceFileHash)
-  // We reuse the structure from crypto utils but map fields correctly
+  // SHA256(commitmentId + executionTime + executionLocation)
   const poeHash = generatePoEHash({
     commitmentId,
     timestamp: executionTime,
     latitude: executionLocation.lat,
-    longitude: executionLocation.lng,
-    evidenceUrl: evidenceFileHash // Mapping evidenceFileHash to evidenceUrl param
+    longitude: executionLocation.lng
   });
 
   // 6. Store Proof Immutably
@@ -65,7 +62,6 @@ const executeTask = (data) => {
     commitmentId,
     executionLocation,
     executionTime,
-    evidenceFileHash,
     status: 'PROOF_GENERATED',
     createdAt: new Date().toISOString()
   };

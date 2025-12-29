@@ -3,7 +3,6 @@ import {
   CheckCircle2,
   MapPin,
   Clock,
-  Fingerprint,
   Terminal,
   Activity,
   Globe,
@@ -14,7 +13,7 @@ import Layout from './Layout';
 import './VerifyExecutionProof.css';
 
 const VerifyExecutionProof = () => {
-  const [proofHash, setProofHash] = useState('0x8f2a9c3e1b7d5f0a4c2e6b8d1f3a5c7e9b0d2f4a6c8e1b3d5f7a9c0e2b4d6f8');
+  const [proofHash, setProofHash] = useState('...');
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
 
@@ -47,8 +46,8 @@ const VerifyExecutionProof = () => {
           <div>
             <h1 className="verify-title">VERIFY EXECUTION PROOF</h1>
             <p className="verify-description">
-              Validate cryptographic commitments against the immutable ledger. Confirm location,
-              timestamp, and evidence integrity without authentication.
+              Validate cryptographic commitments against the immutable ledger. Confirm location and
+              timestamp integrity without authentication.
             </p>
           </div>
         </div>
@@ -112,16 +111,6 @@ const VerifyExecutionProof = () => {
                   <div className="integrity-content">
                     <span className="integrity-label">Timestamp</span>
                     <span className="integrity-status">SYNCED</span>
-                  </div>
-                </div>
-                <div className="integrity-item">
-                  <div className="integrity-icon-wrapper">
-                    <Fingerprint size={20} className="integrity-icon" />
-                    <CheckCircle2 size={16} className="integrity-check" />
-                  </div>
-                  <div className="integrity-content">
-                    <span className="integrity-label">Evidence Hash</span>
-                    <span className="integrity-status">VERIFIED</span>
                   </div>
                 </div>
               </div>

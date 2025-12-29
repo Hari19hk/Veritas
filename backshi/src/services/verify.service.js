@@ -38,8 +38,7 @@ const verifyProof = (poeHash) => {
     commitmentId: proof.commitmentId,
     timestamp: proof.executionTime,
     latitude: proof.executionLocation.lat,
-    longitude: proof.executionLocation.lng,
-    evidenceUrl: proof.evidenceFileHash
+    longitude: proof.executionLocation.lng
   });
 
   const hashMatch = recomputedHash === poeHash;
@@ -69,8 +68,7 @@ const verifyProof = (poeHash) => {
       checks: {
         hashMatch,
         time: timeValid,
-        location: locationValid,
-        evidence: true // Implicitly true if hash matches, but keeping structure
+        location: locationValid
       }
     };
   }
@@ -80,8 +78,7 @@ const verifyProof = (poeHash) => {
     checks: {
       hashMatch,
       time: timeValid,
-      location: locationValid,
-      evidence: true
+      location: locationValid
     }
   };
 };
