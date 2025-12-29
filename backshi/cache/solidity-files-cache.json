@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/hk/Documents/projects/gdg/GDG/backshi/contracts/ProofOfExecution.sol": {
+      "lastModificationDate": 1767002647595,
+      "contentHash": "12b2e7b3db4cb3b85208b6ecc160d07d",
+      "sourceName": "contracts/ProofOfExecution.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ProofOfExecution"
+      ]
+    }
+  }
+}

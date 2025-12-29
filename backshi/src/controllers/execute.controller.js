@@ -1,18 +1,19 @@
-const proofService = require('../services/proof.service');
+import proofService from '../services/proof.service.js';
 
-const executeTask = (req, res) => {
+const executeTask = async (req, res) => {
   try {
-    const proof = proofService.executeTask(req.body);
-    res.status(201).json({
+    const proof = await proofService(req.body);
+
+    return res.status(201).json({
       poeHash: proof.poeHash,
       status: proof.status,
       data: proof
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(400).json({
+      error: error.message
+    });
   }
 };
 
-module.exports = {
-  executeTask
-};
+export default executeTask;

@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const commitRoutes = require('./routes/commit.routes');
-const executeRoutes = require('./routes/execute.routes');
-const verifyRoutes = require('./routes/verify.routes');
+import express from 'express';
+import cors from 'cors'
+import commitRoutes from './routes/commit.routes.js';
+import executeRoutes from './routes/execute.routes.js';
+import verifyRoutes from './routes/verify.routes.js';
 
 const app = express();
 
@@ -20,4 +20,4 @@ app.get('/', (req, res) => {
   res.send('PoEChain Backend is running');
 });
 
-module.exports = app;
+export default app;

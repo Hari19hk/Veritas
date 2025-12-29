@@ -6,7 +6,7 @@
  * @param {number} lon2 
  * @returns {number} Distance in meters
  */
-const getDistanceFromLatLonInMeters = (lat1, lon1, lat2, lon2) => {
+export const getDistanceFromLatLonInMeters = (lat1, lon1, lat2, lon2) => {
   const R = 6371e3; // Radius of the earth in meters
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
@@ -23,6 +23,3 @@ const deg2rad = (deg) => {
   return deg * (Math.PI / 180);
 };
 
-module.exports = {
-  getDistanceFromLatLonInMeters
-};

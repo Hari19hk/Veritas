@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const commitController = require('../controllers/commit.controller');
+import commitController from '../controllers/commit.controller.js'
 
-router.post('/commit', commitController.createCommitment);
+router.post('/commit', commitController);
 
-module.exports = router;
+export default router;

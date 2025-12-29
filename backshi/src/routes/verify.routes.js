@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const verifyController = require('../controllers/verify.controller');
+import verifyController from '../controllers/verify.controller.js'
 
-router.get('/verify', verifyController.verifyProof);
+router.get('/verify', verifyController);
 
-module.exports = router;
+export default router;
