@@ -146,8 +146,68 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
+.coordinates-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.coordinate-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.coordinate-label {
+  font-size: 13px;
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+}
+
+.coordinate-input {
+  width: 100px;
+  padding: 6px 10px;
+  background-color: #0a0a0a;
+  border: 1px solid #1f1f1f;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.coordinate-input:focus {
+  border-color: #10b981;
+}
+
+.coordinate-input.error {
+  border-color: #ef4444;
+}
+
+.coordinate-direction {
+  font-size: 13px;
+  color: #10b981;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  min-width: 30px;
+}
+
 .coord-separator {
   color: #6b7280;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.coordinate-error {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  font-size: 11px;
+  color: #ef4444;
 }
 
 .map-container {

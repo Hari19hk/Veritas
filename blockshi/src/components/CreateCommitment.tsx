@@ -60,6 +60,8 @@ const CreateCommitment = () => {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [mapCenter, setMapCenter] = useState<[number, number]>([34.0522, -118.2437]);
+  const [latitudeInput, setLatitudeInput] = useState('34.0522');
+  const [longitudeInput, setLongitudeInput] = useState('-118.2437');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [commitmentData, setCommitmentData] = useState<{
@@ -85,6 +87,56 @@ const CreateCommitment = () => {
     }
     return hash;
   };
+
+  // Handle coordinate input changes and update map
+  const handleLatitudeChange = (value: string) => {
+    setLatitudeInput(value);
+    const lat = parseFloat(value);
+    if (!isNaN(lat) && lat >= -90 && lat <= 90) {
+      setMapCenter([lat, mapCenter[1]]);
+      if (errors.latitude) {
+        setErrors({ ...errors, latitude: '' });
+      }
+    }
+  };
+
+  const handleLongitudeChange = (value: string) => {
+    setLongitudeInput(value);
+    const lng = parseFloat(value);
+    if (!isNaN(lng) && lng >= -180 && lng <= 180) {
+      setMapCenter([mapCenter[0], lng]);
+      if (errors.longitude) {
+        setErrors({ ...errors, longitude: '' });
+      }
+    }
+  };
+
+  // Handle blur events to update map with final values
+  const handleLatitudeBlur = () => {
+    const lat = parseFloat(latitudeInput);
+    if (!isNaN(lat) && lat >= -90 && lat <= 90) {
+      setMapCenter([lat, mapCenter[1]]);
+      setLatitudeInput(lat.toFixed(4));
+    } else if (latitudeInput.trim() === '') {
+      setLatitudeInput(mapCenter[0].toFixed(4));
+    }
+  };
+
+  const handleLongitudeBlur = () => {
+    const lng = parseFloat(longitudeInput);
+    if (!isNaN(lng) && lng >= -180 && lng <= 180) {
+      setMapCenter([mapCenter[0], lng]);
+      setLongitudeInput(lng.toFixed(4));
+    } else if (longitudeInput.trim() === '') {
+      setLongitudeInput(mapCenter[1].toFixed(4));
+    }
+  };
+
+  // Update input fields when map is clicked
+  useEffect(() => {
+    setLatitudeInput(mapCenter[0].toFixed(4));
+    setLongitudeInput(mapCenter[1].toFixed(4));
+  }, [mapCenter]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -127,6 +179,16 @@ const CreateCommitment = () => {
       }
     }
 
+    // Validate coordinates
+    const lat = parseFloat(latitudeInput);
+    const lng = parseFloat(longitudeInput);
+    if (isNaN(lat) || lat < -90 || lat > 90) {
+      newErrors.latitude = 'Latitude must be between -90 and 90';
+    }
+    if (isNaN(lng) || lng < -180 || lng > 180) {
+      newErrors.longitude = 'Longitude must be between -180 and 180';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -134,6 +196,13 @@ const CreateCommitment = () => {
   const handleCommit = async () => {
     if (!validateForm()) {
       return;
+    }
+
+    // Ensure coordinates are updated from inputs
+    const lat = parseFloat(latitudeInput);
+    const lng = parseFloat(longitudeInput);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      setMapCenter([lat, lng]);
     }
 
     setIsSubmitting(true);
@@ -146,6 +215,10 @@ const CreateCommitment = () => {
     const proofHash = generateProofHash();
     const timestamp = new Date().toISOString();
 
+    // Use validated coordinates
+    const finalLat = parseFloat(latitudeInput);
+    const finalLng = parseFloat(longitudeInput);
+
     const data = {
       commitmentId,
       proofHash,
@@ -155,8 +228,8 @@ const CreateCommitment = () => {
       startTime,
       endTime,
       location: {
-        lat: mapCenter[0],
-        lng: mapCenter[1]
+        lat: finalLat,
+        lng: finalLng
       }
     };
 
@@ -197,10 +270,38 @@ const CreateCommitment = () => {
               <MapPin size={18} className="panel-icon" />
               <h2 className="panel-title">SELECT TARGET LOCATION</h2>
             </div>
-            <div className="coordinates">
-              <span>LAT: {mapCenter[0].toFixed(4)} N</span>
+            <div className="coordinates-input-wrapper">
+              <div className="coordinate-input-group">
+                <label className="coordinate-label">LAT:</label>
+                <input
+                  type="text"
+                  className={`coordinate-input ${errors.latitude ? 'error' : ''}`}
+                  value={latitudeInput}
+                  onChange={(e) => handleLatitudeChange(e.target.value)}
+                  onBlur={handleLatitudeBlur}
+                  placeholder="34.0522"
+                />
+                <span className="coordinate-direction">{mapCenter[0] >= 0 ? 'N' : 'S'}</span>
+              </div>
               <span className="coord-separator">/</span>
-              <span>LON: {Math.abs(mapCenter[1]).toFixed(4)} W</span>
+              <div className="coordinate-input-group">
+                <label className="coordinate-label">LON:</label>
+                <input
+                  type="text"
+                  className={`coordinate-input ${errors.longitude ? 'error' : ''}`}
+                  value={longitudeInput}
+                  onChange={(e) => handleLongitudeChange(e.target.value)}
+                  onBlur={handleLongitudeBlur}
+                  placeholder="-118.2437"
+                />
+                <span className="coordinate-direction">{mapCenter[1] >= 0 ? 'E' : 'W'}</span>
+              </div>
+              {errors.latitude && (
+                <span className="error-message coordinate-error">{errors.latitude}</span>
+              )}
+              {errors.longitude && (
+                <span className="error-message coordinate-error">{errors.longitude}</span>
+              )}
             </div>
             <div className="map-container">
               <MapContainer
