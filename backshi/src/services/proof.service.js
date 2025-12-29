@@ -1,6 +1,9 @@
-const { commitments, proofs } = require('../store/memoryStore');
-const { generatePoEHash } = require('../utils/crypto');
-const { getDistanceFromLatLonInMeters } = require('../utils/geo');
+import { commitments, proofs } from '../store/memoryStore.js';
+import { generatePoEHash } from '../utils/crypto.js';
+import { getDistanceFromLatLonInMeters } from '../utils/geo.js';
+import { storeProofOnChain } from '../blockchain/poeContract.js';
+
+
 
 const ALLOWED_RADIUS_METERS = 200; // MVP constraint
 
@@ -13,7 +16,7 @@ const ALLOWED_RADIUS_METERS = 200; // MVP constraint
  * @param {string} data.evidenceFileHash
  * @returns {object} Proof data
  */
-const executeTask = (data) => {
+const executeTask = async (data) => {
   const { commitmentId, executionLocation, executionTime, evidenceFileHash } = data;
 
   // 1. Validate Input
@@ -59,6 +62,9 @@ const executeTask = (data) => {
     evidenceUrl: evidenceFileHash // Mapping evidenceFileHash to evidenceUrl param
   });
 
+ 
+
+
   // 6. Store Proof Immutably
   const proof = {
     poeHash,
@@ -72,9 +78,14 @@ const executeTask = (data) => {
 
   proofs.set(poeHash, Object.freeze(proof));
 
-  return proof;
+   // 7. Anchor Proof on Blockchain
+   const { txHash } = await storeProofOnChain(commitmentId, poeHash);
+
+   return {
+    ...proof,
+    blockchainTx: txHash
+  };
+  
 };
 
-module.exports = {
-  executeTask
-};
+export default executeTask;

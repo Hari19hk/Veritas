@@ -1,21 +1,23 @@
-const { commitments, proofs } = require('../store/memoryStore');
-const { generatePoEHash } = require('../utils/crypto');
-const { getDistanceFromLatLonInMeters } = require('../utils/geo');
+import { commitments, proofs } from '../store/memoryStore.js';
+import { generatePoEHash } from '../utils/crypto.js';
+import { getDistanceFromLatLonInMeters } from '../utils/geo.js';
+import { getProofFromChain } from '../blockchain/poeContract.js';
+
 
 const ALLOWED_RADIUS_METERS = 200;
 
 /**
  * Verifies a Proof of Execution
- * @param {string} poeHash 
+ * @param {string} poeHash
  * @returns {object} Verification result
  */
-const verifyProof = (poeHash) => {
+const verifyProof = async (poeHash) => {
   // 1. Validate Input
   if (!poeHash) {
     throw new Error('Missing poeHash parameter');
   }
 
-  // 2. Fetch Proof
+  // 2. Fetch Proof (off-chain)
   const proof = proofs.get(poeHash);
   if (!proof) {
     return {
@@ -33,7 +35,7 @@ const verifyProof = (poeHash) => {
     };
   }
 
-  // 4. Recompute Hash
+  // 4. Recompute PoE hash from stored data
   const recomputedHash = generatePoEHash({
     commitmentId: proof.commitmentId,
     timestamp: proof.executionTime,
@@ -44,13 +46,27 @@ const verifyProof = (poeHash) => {
 
   const hashMatch = recomputedHash === poeHash;
 
-  // 5. Validate Time
+  // 5. Fetch on-chain hash
+  let onChainHash;
+  try {
+    const chainProof = await getProofFromChain(proof.commitmentId);
+    onChainHash = chainProof.poeHash;
+  } catch (err) {
+    return {
+      valid: false,
+      reason: 'Proof not anchored on blockchain'
+    };
+  }
+
+  const onChainMatch = recomputedHash === onChainHash;
+
+  // 6. Validate Time
   const execTime = new Date(proof.executionTime);
   const startTime = new Date(commitment.timeWindow.start);
   const endTime = new Date(commitment.timeWindow.end);
   const timeValid = execTime >= startTime && execTime <= endTime;
 
-  // 6. Validate Location
+  // 7. Validate Location
   const distance = getDistanceFromLatLonInMeters(
     commitment.location.lat,
     commitment.location.lng,
@@ -59,8 +75,12 @@ const verifyProof = (poeHash) => {
   );
   const locationValid = distance <= ALLOWED_RADIUS_METERS;
 
-  // 7. Final Decision
-  const isValid = hashMatch && timeValid && locationValid;
+  // 8. Final Decision (ALL checks must pass)
+  const isValid =
+    hashMatch &&
+    onChainMatch &&
+    timeValid &&
+    locationValid;
 
   if (!isValid) {
     return {
@@ -68,9 +88,9 @@ const verifyProof = (poeHash) => {
       reason: 'Verification failed',
       checks: {
         hashMatch,
+        onChainMatch,
         time: timeValid,
-        location: locationValid,
-        evidence: true // Implicitly true if hash matches, but keeping structure
+        location: locationValid
       }
     };
   }
@@ -79,13 +99,12 @@ const verifyProof = (poeHash) => {
     valid: true,
     checks: {
       hashMatch,
+      onChainMatch,
       time: timeValid,
-      location: locationValid,
-      evidence: true
+      location: locationValid
     }
   };
 };
 
-module.exports = {
-  verifyProof
-};
+
+export default verifyProof;

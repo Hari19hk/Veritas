@@ -1,8 +1,8 @@
-const commitmentService = require('../services/commitment.service');
+import {createCommitment as createCommitmentService} from '../services/commitment.service.js'
 
 const createCommitment = (req, res) => {
   try {
-    const commitment = commitmentService.createCommitment(req.body);
+    const commitment = createCommitmentService(req.body);
     res.status(201).json({
       commitmentId: commitment.commitmentId,
       status: commitment.status,
@@ -13,6 +13,4 @@ const createCommitment = (req, res) => {
   }
 };
 
-module.exports = {
-  createCommitment
-};
+export default createCommitment

@@ -1,5 +1,5 @@
-const { commitments } = require('../store/memoryStore');
-const crypto = require('crypto');
+import { commitments } from '../store/memoryStore.js';
+import crypto from 'crypto'
 
 /**
  * Creates a new task commitment
@@ -9,7 +9,7 @@ const crypto = require('crypto');
  * @param {object} data.timeWindow { start, end }
  * @returns {object} Created commitment
  */
-const createCommitment = (data) => {
+export const createCommitment = (data) => {
   const { taskName, location, timeWindow } = data;
 
   // 1. Basic Validation
@@ -45,11 +45,8 @@ const createCommitment = (data) => {
  * @param {string} commitmentId 
  * @returns {object|null}
  */
-const getCommitment = (commitmentId) => {
+export const getCommitment = (commitmentId) => {
   return commitments.get(commitmentId) || null;
 };
 
-module.exports = {
-  createCommitment,
-  getCommitment
-};
+
