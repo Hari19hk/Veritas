@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   MapPin,
   Rocket,
@@ -56,7 +55,6 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
 }
 
 const CreateCommitment = () => {
-  const navigate = useNavigate();
   const [taskIdentifier, setTaskIdentifier] = useState('');
   const [missionBrief, setMissionBrief] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -164,15 +162,13 @@ const CreateCommitment = () => {
 
     setCommitmentData({ commitmentId, proofHash, timestamp });
 
-    // Store in localStorage for demo purposes
-    localStorage.setItem('lastCommitment', JSON.stringify(data));
+    // Store in localStorage
+    const storedCommitments = localStorage.getItem('commitments');
+    const commitments = storedCommitments ? JSON.parse(storedCommitments) : [];
+    commitments.unshift(data); // Add to beginning
+    localStorage.setItem('commitments', JSON.stringify(commitments));
 
     setIsSubmitting(false);
-
-    // Navigate to proof page after 2 seconds
-    setTimeout(() => {
-      navigate('/proof-of-execution');
-    }, 2000);
   };
 
   return (
@@ -352,8 +348,8 @@ const CreateCommitment = () => {
               </div>
 
               {/* Commit Button */}
-              <button 
-                className="commit-btn" 
+              <button
+                className="commit-btn"
                 onClick={handleCommit}
                 disabled={isSubmitting}
               >
@@ -368,7 +364,7 @@ const CreateCommitment = () => {
         {commitmentData && (
           <div className="success-modal-overlay" onClick={() => setCommitmentData(null)}>
             <div className="success-modal" onClick={(e) => e.stopPropagation()}>
-              <button 
+              <button
                 className="modal-close"
                 onClick={() => setCommitmentData(null)}
               >
@@ -396,7 +392,6 @@ const CreateCommitment = () => {
                     </span>
                   </div>
                 </div>
-                <p className="redirect-message">Redirecting to proof page...</p>
               </div>
             </div>
           </div>

@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Bell,
-  Settings
+  Settings,
+  FileText
 } from 'lucide-react';
 import './Dashboard.css';
 
@@ -167,6 +168,13 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
             >
               <ShieldCheck size={20} />
               {!sidebarCollapsed && <span>Verify execution proof</span>}
+            </Link>
+            <Link
+              to="/logs"
+              className={`nav-item ${isActive('/logs') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
+            >
+              <FileText size={20} />
+              {!sidebarCollapsed && <span>Execution Logs</span>}
             </Link>
           </nav>
 
