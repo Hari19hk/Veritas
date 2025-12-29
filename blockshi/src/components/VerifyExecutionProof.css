@@ -350,6 +350,11 @@
   font-weight: 600;
 }
 
+.console-error {
+  color: #ef4444;
+  font-weight: 600;
+}
+
 .console-time {
   color: #6b7280;
 }
@@ -360,6 +365,10 @@
 
 .console-line.success .console-message {
   color: #10b981;
+}
+
+.console-line.error .console-message {
+  color: #ef4444;
 }
 
 /* Metrics Section */
@@ -496,6 +505,15 @@
   .verify-footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

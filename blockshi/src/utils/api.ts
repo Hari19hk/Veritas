@@ -331,3 +331,48 @@ export const getAllProofs = async (): Promise<Proof[]> => {
 // Explicit type re-export for compatibility
 export type { Proof };
 
+export interface VerifyProofResponse {
+  valid: boolean;
+  reason?: string;
+  checks?: {
+    hashMatch: boolean;
+    onChainMatch: boolean;
+    time: boolean;
+    location: boolean;
+  };
+}
+
+/**
+ * Verifies a proof by poeHash via the backend API
+ */
+export const verifyProof = async (poeHash: string): Promise<VerifyProofResponse> => {
+  const timestamp = new Date().toISOString();
+  
+  console.log(`[${timestamp}] API Call: GET ${API_BASE_URL}/verify?poeHash=${poeHash}`);
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/verify?poeHash=${encodeURIComponent(poeHash)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error(`[${new Date().toISOString()}] API Error:`, error);
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    
+    console.log(`[${new Date().toISOString()}] API Response: Success`);
+    console.log('Verification result:', JSON.stringify(responseData, null, 2));
+    
+    return responseData;
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
+    throw error;
+  }
+};
+
