@@ -34,6 +34,13 @@ interface Commitment {
   };
 }
 
+// Helper to convert date to local ISO string for datetime-local input
+const toLocalISOString = (date: Date) => {
+  const tzOffset = date.getTimezoneOffset() * 60000;
+  const localTime = new Date(date.getTime() - tzOffset);
+  return localTime.toISOString().slice(0, 16);
+};
+
 const ExecuteTask = () => {
   const [locationInput, setLocationInput] = useState('');
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
@@ -102,9 +109,9 @@ const ExecuteTask = () => {
               const start = new Date(firstCommitment.timeWindow.start);
               const end = new Date(firstCommitment.timeWindow.end);
               if (now >= start && now <= end) {
-                setExecutionTime(now.toISOString().slice(0, 16));
+                setExecutionTime(toLocalISOString(now));
               } else {
-                setExecutionTime(start.toISOString().slice(0, 16));
+                setExecutionTime(toLocalISOString(start));
               }
               return firstCommitment.commitmentId;
             }
@@ -142,9 +149,9 @@ const ExecuteTask = () => {
         const start = new Date(selectedCommitment.timeWindow.start);
         const end = new Date(selectedCommitment.timeWindow.end);
         if (now >= start && now <= end) {
-          setExecutionTime(now.toISOString().slice(0, 16));
+          setExecutionTime(toLocalISOString(now));
         } else {
-          setExecutionTime(start.toISOString().slice(0, 16));
+          setExecutionTime(toLocalISOString(start));
         }
       }
     }
@@ -419,9 +426,9 @@ const ExecuteTask = () => {
                     const start = new Date(selectedCommitment.timeWindow.start);
                     const end = new Date(selectedCommitment.timeWindow.end);
                     if (now >= start && now <= end) {
-                      setExecutionTime(now.toISOString().slice(0, 16));
+                      setExecutionTime(toLocalISOString(now));
                     } else {
-                      setExecutionTime(start.toISOString().slice(0, 16));
+                      setExecutionTime(toLocalISOString(start));
                     }
                   }
                 }
@@ -443,6 +450,8 @@ const ExecuteTask = () => {
           <span className="session-text">Session ID: 0x8F92A1</span>
         </div>
       </div>
+
+
 
       {/* Two Column Layout */}
       <div className="execute-content">
