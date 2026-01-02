@@ -1,5 +1,5 @@
-import { commitments } from '../store/memoryStore.js';
-import crypto from 'crypto'
+import crypto from 'crypto';
+import { db } from '../config/firebase.js';
 
 /**
  * Creates a new task commitment
@@ -9,7 +9,7 @@ import crypto from 'crypto'
  * @param {object} data.timeWindow { start, end }
  * @returns {object} Created commitment
  */
-export const createCommitment = (data) => {
+export const createCommitment = async (data) => {
   const { taskName, location, timeWindow } = data;
 
   // 1. Basic Validation
@@ -31,30 +31,44 @@ export const createCommitment = (data) => {
     location,
     timeWindow,
     status: 'COMMITTED',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 
-  // 4. Store Immutably (in memory)
-  commitments.set(commitmentId, Object.freeze(commitment));
+  // 4. Store in Firestore (persistent)
+  await db
+    .collection('commitments')
+    .doc(commitmentId)
+    .set(commitment);
 
   return commitment;
 };
 
 /**
  * Retrieves a commitment by ID
- * @param {string} commitmentId 
+ * @param {string} commitmentId
  * @returns {object|null}
  */
-export const getCommitment = (commitmentId) => {
-  return commitments.get(commitmentId) || null;
+export const getCommitment = async (commitmentId) => {
+  const doc = await db
+    .collection('commitments')
+    .doc(commitmentId)
+    .get();
+
+  if (!doc.exists) {
+    return null;
+  }
+
+  return doc.data();
 };
 
 /**
  * Retrieves all commitments
  * @returns {Array} Array of all commitments
  */
-export const getAllCommitments = () => {
-  return Array.from(commitments.values());
+export const getAllCommitments = async () => {
+  const snapshot = await db
+    .collection('commitments')
+    .get();
+
+  return snapshot.docs.map(doc => doc.data());
 };
-
-

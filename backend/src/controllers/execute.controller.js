@@ -34,14 +34,14 @@ const executeTask = async (req, res) => {
   }
 };
 
-const getProofByHashHandler = (req, res) => {
+const getProofByHashHandler = async (req, res) => {
   const { poeHash } = req.params;
   const timestamp = new Date().toISOString();
   
   console.log(`[${timestamp}] GET /proofs/${poeHash} - Incoming request`);
   
   try {
-    const proof = getProofByHash(poeHash);
+    const proof = await getProofByHash(poeHash);
     
     if (!proof) {
       console.log(`[${new Date().toISOString()}] GET /proofs/${poeHash} - Not found`);
@@ -56,13 +56,13 @@ const getProofByHashHandler = (req, res) => {
   }
 };
 
-const getAllProofsHandler = (req, res) => {
+const getAllProofsHandler = async(req, res) => {
   const timestamp = new Date().toISOString();
   
   console.log(`[${timestamp}] GET /proofs - Incoming request`);
   
   try {
-    const allProofs = getAllProofs();
+    const allProofs = await getAllProofs();
     
     console.log(`[${new Date().toISOString()}] GET /proofs - Success (${allProofs.length} proofs)`);
     res.json(allProofs);

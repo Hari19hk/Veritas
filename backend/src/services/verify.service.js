@@ -1,10 +1,18 @@
-import { commitments, proofs } from '../store/memoryStore.js';
+import { db } from '../config/firebase.js';
 import { generatePoEHash } from '../utils/crypto.js';
 import { getDistanceFromLatLonInMeters } from '../utils/geo.js';
 import { getProofFromChain } from '../blockchain/poeContract.js';
 
-
 const ALLOWED_RADIUS_METERS = 200;
+
+// Helper: strict UTC date parser
+const parseUtc = (value) => {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) {
+    throw new Error('Invalid date format');
+  }
+  return d;
+};
 
 /**
  * Verifies a Proof of Execution
@@ -17,25 +25,42 @@ const verifyProof = async (poeHash) => {
     throw new Error('Missing poeHash parameter');
   }
 
-  // 2. Fetch Proof (off-chain)
-  const proof = proofs.get(poeHash);
-  if (!proof) {
+  // 2. Fetch Proof from Firestore
+  const proofDoc = await db
+    .collection('proofs')
+    .doc(poeHash)
+    .get();
+
+  if (!proofDoc.exists) {
+    // DEBUG: Log all available IDs to see if there's a mismatch
+    const allProofsSnapshot = await db.collection('proofs').limit(10).get();
+    const availableIds = allProofsSnapshot.docs.map(d => d.id);
+    console.log(`[DEBUG] Proof ${poeHash} not found. Available IDs (first 10):`, availableIds);
+
     return {
       valid: false,
       reason: 'Proof not found'
     };
   }
 
-  // 3. Fetch Commitment
-  const commitment = commitments.get(proof.commitmentId);
-  if (!commitment) {
+  const proof = proofDoc.data();
+
+  // 3. Fetch Commitment from Firestore
+  const commitmentDoc = await db
+    .collection('commitments')
+    .doc(proof.commitmentId)
+    .get();
+
+  if (!commitmentDoc.exists) {
     return {
       valid: false,
       reason: 'Associated commitment not found'
     };
   }
 
-  // 4. Recompute PoE hash from stored data
+  const commitment = commitmentDoc.data();
+
+  // 4. Recompute PoE hash
   const recomputedHash = generatePoEHash({
     commitmentId: proof.commitmentId,
     timestamp: proof.executionTime,
@@ -46,23 +71,22 @@ const verifyProof = async (poeHash) => {
   const hashMatch = recomputedHash === poeHash;
 
   // 5. Fetch on-chain hash
-  let onChainHash;
+  let onChainMatch = false;
   try {
     const chainProof = await getProofFromChain(proof.commitmentId);
-    onChainHash = chainProof.poeHash;
-  } catch (err) {
+    onChainMatch = recomputedHash === chainProof.poeHash;
+  } catch {
     return {
       valid: false,
       reason: 'Proof not anchored on blockchain'
     };
   }
 
-  const onChainMatch = recomputedHash === onChainHash;
+  // 6. Validate Time (UTC-safe)
+  const execTime = parseUtc(proof.executionTime);
+  const startTime = parseUtc(commitment.timeWindow.start);
+  const endTime = parseUtc(commitment.timeWindow.end);
 
-  // 6. Validate Time
-  const execTime = new Date(proof.executionTime);
-  const startTime = new Date(commitment.timeWindow.start);
-  const endTime = new Date(commitment.timeWindow.end);
   const timeValid = execTime >= startTime && execTime <= endTime;
 
   // 7. Validate Location
@@ -72,9 +96,10 @@ const verifyProof = async (poeHash) => {
     proof.executionLocation.lat,
     proof.executionLocation.lng
   );
+
   const locationValid = distance <= ALLOWED_RADIUS_METERS;
 
-  // 8. Final Decision (ALL checks must pass)
+  // 8. Final Decision
   const isValid =
     hashMatch &&
     onChainMatch &&
@@ -104,6 +129,5 @@ const verifyProof = async (poeHash) => {
     }
   };
 };
-
 
 export default verifyProof;

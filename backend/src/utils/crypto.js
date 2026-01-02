@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'crypto';
 
 /**
  * Generates a SHA-256 hash of the input data.
@@ -8,7 +8,7 @@ import crypto from 'crypto'
 export const generateHash = (data) => {
   const stringData = typeof data === 'string' ? data : JSON.stringify(data);
   return crypto.createHash('sha256').update(stringData).digest('hex');
-};``
+};
 
 /**
  * Generates a deterministic Proof of Execution hash.
@@ -20,9 +20,8 @@ export const generateHash = (data) => {
  * @param {number} params.longitude
  * @returns {string}
  */
-export const generatePoEHash = ({ commitmentId, timestamp, latitude, longitude, evidenceUrl }) => {
+export const generatePoEHash = ({ commitmentId, timestamp, latitude, longitude }) => {
   // Ensure deterministic order and types
   const payload = `${commitmentId}:${timestamp}:${latitude}:${longitude}`;
   return generateHash(payload);
 };
-

@@ -1,6 +1,6 @@
 import {createCommitment as createCommitmentService, getCommitment, getAllCommitments} from '../services/commitment.service.js'
 
-const createCommitment = (req, res) => {
+const createCommitment = async (req, res) => {
   const timestamp = new Date().toISOString();
   
   // Log incoming request
@@ -8,7 +8,7 @@ const createCommitment = (req, res) => {
   console.log('Request body:', JSON.stringify(req.body, null, 2));
   
   try {
-    const commitment = createCommitmentService(req.body);
+    const commitment = await createCommitmentService(req.body);
     
     // Log successful response
     console.log(`[${new Date().toISOString()}] POST /commit - Success`);
@@ -32,14 +32,14 @@ const createCommitment = (req, res) => {
   }
 };
 
-const getCommitmentById = (req, res) => {
+const getCommitmentById = async (req, res) => {
   const { id } = req.params;
   const timestamp = new Date().toISOString();
   
   console.log(`[${timestamp}] GET /commitments/${id} - Incoming request`);
   
   try {
-    const commitment = getCommitment(id);
+    const commitment = await getCommitment(id);
     
     if (!commitment) {
       console.log(`[${new Date().toISOString()}] GET /commitments/${id} - Not found`);
@@ -54,13 +54,13 @@ const getCommitmentById = (req, res) => {
   }
 };
 
-const getAllCommitmentsHandler = (req, res) => {
+const getAllCommitmentsHandler = async (req, res) => {
   const timestamp = new Date().toISOString();
   
   console.log(`[${timestamp}] GET /commitments - Incoming request`);
   
   try {
-    const allCommitments = getAllCommitments();
+    const allCommitments = await getAllCommitments();
     
     console.log(`[${new Date().toISOString()}] GET /commitments - Success (${allCommitments.length} commitments)`);
     res.json(allCommitments);

@@ -254,6 +254,16 @@ const CreateCommitment = () => {
         timestamp: response.data.createdAt,
       });
       localStorage.setItem('commitments', JSON.stringify(commitments));
+
+      // Clear form
+      setTaskIdentifier('');
+      setMissionBrief('');
+      setStartTime('');
+      setEndTime('');
+      // Reset map to default
+      setMapCenter([34.0522, -118.2437]);
+      setLatitudeInput('34.0522');
+      setLongitudeInput('-118.2437');
     } catch (error) {
       console.error('Error creating commitment:', error);
       setApiError(error instanceof Error ? error.message : 'Failed to create commitment');
