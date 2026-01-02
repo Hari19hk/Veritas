@@ -84,4 +84,21 @@ const executeTask = async (data) => {
   
 };
 
+/**
+ * Gets a proof by poeHash
+ * @param {string} poeHash
+ * @returns {object|null}
+ */
+export const getProofByHash = (poeHash) => {
+  return proofs.get(poeHash) || null;
+};
+
+/**
+ * Gets all proofs
+ * @returns {Array}
+ */
+export const getAllProofs = () => {
+  return Array.from(proofs.values());
+};
+
 export default executeTask;

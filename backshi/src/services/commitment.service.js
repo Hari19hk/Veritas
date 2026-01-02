@@ -49,4 +49,12 @@ export const getCommitment = (commitmentId) => {
   return commitments.get(commitmentId) || null;
 };
 
+/**
+ * Retrieves all commitments
+ * @returns {Array} Array of all commitments
+ */
+export const getAllCommitments = () => {
+  return Array.from(commitments.values());
+};
+
 
