@@ -148,7 +148,7 @@ const ExecuteTask = () => {
         }
       }
     }
-  }, [selectedCommitmentId, commitments, executionTime]);
+  }, [selectedCommitmentId, commitments]);
 
   const handleFileUpload = (files: FileList | null) => {
     if (files && files.length > 0) {
@@ -641,22 +641,6 @@ const ExecuteTask = () => {
                     className="location-input"
                     value={executionTime}
                     onChange={(e) => setExecutionTime(e.target.value)}
-                    min={selectedCommitmentId ? (() => {
-                      const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
-                      if (selectedCommitment && selectedCommitment.timeWindow) {
-                        const start = new Date(selectedCommitment.timeWindow.start);
-                        return start.toISOString().slice(0, 16);
-                      }
-                      return '';
-                    })() : ''}
-                    max={selectedCommitmentId ? (() => {
-                      const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
-                      if (selectedCommitment && selectedCommitment.timeWindow) {
-                        const end = new Date(selectedCommitment.timeWindow.end);
-                        return end.toISOString().slice(0, 16);
-                      }
-                      return '';
-                    })() : ''}
                   />
                 </div>
                 <div className="info-text">
