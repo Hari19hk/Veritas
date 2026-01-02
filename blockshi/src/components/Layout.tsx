@@ -4,8 +4,6 @@ import {
   LayoutDashboard,
   Plus,
   Play,
-  ShieldCheck,
-  FileCheck,
   CheckCircle2,
   Lock,
   Search,
@@ -40,15 +38,12 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
 
     // Search mappings
     const searchMap: { [key: string]: string } = {
-      'dashboard': '/',
-      'create': '/create-commitment',
-      'commitment': '/create-commitment',
-      'execute': '/execute-task',
-      'task': '/execute-task',
-      'proof': '/proof-of-execution',
-      'execution': '/proof-of-execution',
-      'verify': '/verify-execution-proof',
-      'verification': '/verify-execution-proof',
+      'dashboard': '/app/dashboard',
+      'create': '/app/create-commitment',
+      'commitment': '/app/create-commitment',
+      'execute': '/app/execute-task',
+      'task': '/app/execute-task',
+      'logs': '/app/logs',
     };
 
     // Check for matches
@@ -133,8 +128,8 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
 
           <nav className="sidebar-nav">
             <Link
-              to="/"
-              className={`nav-item ${isActive('/') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
+              to="/app/dashboard"
+              className={`nav-item ${isActive('/app/dashboard') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
             >
               <div className="dashboard-icon-wrapper">
                 <LayoutDashboard size={20} />
@@ -142,36 +137,22 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
               {!sidebarCollapsed && <span>Dashboard</span>}
             </Link>
             <Link
-              to="/create-commitment"
-              className={`nav-item ${isActive('/create-commitment') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
+              to="/app/create-commitment"
+              className={`nav-item ${isActive('/app/create-commitment') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
             >
               <Plus size={20} />
               {!sidebarCollapsed && <span>Create Commitment</span>}
             </Link>
             <Link
-              to="/execute-task"
-              className={`nav-item ${isActive('/execute-task') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
+              to="/app/execute-task"
+              className={`nav-item ${isActive('/app/execute-task') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
             >
               <Play size={20} />
               {!sidebarCollapsed && <span>Execute Task</span>}
             </Link>
             <Link
-              to="/proof-of-execution"
-              className={`nav-item ${isActive('/proof-of-execution') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
-            >
-              <FileCheck size={20} />
-              {!sidebarCollapsed && <span>Proof of Execution</span>}
-            </Link>
-            <Link
-              to="/verify-execution-proof"
-              className={`nav-item ${isActive('/verify-execution-proof') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
-            >
-              <ShieldCheck size={20} />
-              {!sidebarCollapsed && <span>Verify execution proof</span>}
-            </Link>
-            <Link
-              to="/logs"
-              className={`nav-item ${isActive('/logs') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
+              to="/app/logs"
+              className={`nav-item ${isActive('/app/logs') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
             >
               <FileText size={20} />
               {!sidebarCollapsed && <span>Execution Logs</span>}

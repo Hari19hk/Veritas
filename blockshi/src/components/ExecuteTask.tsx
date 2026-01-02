@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   AlertTriangle
 } from 'lucide-react';
-import Layout from './Layout';
 import './ExecuteTask.css';
 import { executeTask, hashFiles, getAllCommitments } from '../utils/api';
 
@@ -62,7 +61,7 @@ const ExecuteTask = () => {
         console.log('[ExecuteTask] Fetching commitments from backend...');
         const backendCommitments = await getAllCommitments();
         console.log('[ExecuteTask] Received commitments from backend:', backendCommitments);
-        
+
         // Transform backend format to match frontend format
         const transformedCommitments = backendCommitments.map(commitment => ({
           commitmentId: commitment.commitmentId,
@@ -90,9 +89,9 @@ const ExecuteTask = () => {
             hour12: false
           }).replace(',', ''),
         }));
-        
+
         setCommitments(transformedCommitments);
-        
+
         // Set first commitment as default if available and none selected
         if (transformedCommitments.length > 0) {
           const firstCommitment = transformedCommitments[0];
@@ -115,11 +114,11 @@ const ExecuteTask = () => {
       } catch (error) {
         console.error('[ExecuteTask] Failed to fetch commitments from backend:', error);
         // Fallback to localStorage if backend fails
-    const storedCommitments = localStorage.getItem('commitments');
-    if (storedCommitments) {
-      try {
-        const parsed = JSON.parse(storedCommitments);
-        setCommitments(parsed);
+        const storedCommitments = localStorage.getItem('commitments');
+        if (storedCommitments) {
+          try {
+            const parsed = JSON.parse(storedCommitments);
+            setCommitments(parsed);
             if (parsed.length > 0) {
               setSelectedCommitmentId(prev => prev || parsed[0].commitmentId);
             }
@@ -203,7 +202,7 @@ const ExecuteTask = () => {
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationInput)}&limit=1`
         );
         const data = await response.json();
-        
+
         if (data && data.length > 0) {
           const lat = parseFloat(data[0].lat);
           const lon = parseFloat(data[0].lon);
@@ -307,7 +306,7 @@ const ExecuteTask = () => {
       const execTime = new Date(executionTime);
       const startTime = new Date(selectedCommitment.timeWindow.start);
       const endTime = new Date(selectedCommitment.timeWindow.end);
-      
+
       if (execTime < startTime || execTime > endTime) {
         setApiError(`Execution time must be between ${startTime.toLocaleString()} and ${endTime.toLocaleString()}`);
         return;
@@ -316,7 +315,7 @@ const ExecuteTask = () => {
 
     // Determine final coordinates (from geocoding or manual entry)
     let finalCoordinates = coordinates;
-    
+
     // If no coordinates but manual inputs exist, try to use them
     if (!finalCoordinates && latitudeInput && longitudeInput) {
       const lat = parseFloat(latitudeInput);
@@ -399,404 +398,404 @@ const ExecuteTask = () => {
   };
 
   return (
-    <Layout breadcrumb="execute task">
-      <div className="execute-task-page">
-        {/* Page Header */}
-        <div className="execute-header">
-          <div className="header-content">
-            <h1 className="execute-title">EXECUTE TASK</h1>
-            <div className="task-info">
-              <label className="task-id-label">ID:</label>
-              <select
-                className="commitment-select"
-                value={selectedCommitmentId}
-                onChange={(e) => {
-                  const newCommitmentId = e.target.value;
-                  setSelectedCommitmentId(newCommitmentId);
-                  // Update execution time when commitment changes
-                  if (newCommitmentId) {
-                    const selectedCommitment = commitments.find(c => c.commitmentId === newCommitmentId);
-                    if (selectedCommitment && selectedCommitment.timeWindow) {
-                      const now = new Date();
-                      const start = new Date(selectedCommitment.timeWindow.start);
-                      const end = new Date(selectedCommitment.timeWindow.end);
-                      if (now >= start && now <= end) {
-                        setExecutionTime(now.toISOString().slice(0, 16));
-                      } else {
-                        setExecutionTime(start.toISOString().slice(0, 16));
-                      }
+    <div className="execute-task-page">
+      {/* Page Header */}
+      <div className="execute-header">
+        <div className="header-content">
+          <h1 className="execute-title">EXECUTE TASK</h1>
+          <div className="task-info">
+            <label className="task-id-label">ID:</label>
+            <select
+              className="commitment-select"
+              value={selectedCommitmentId}
+              onChange={(e) => {
+                const newCommitmentId = e.target.value;
+                setSelectedCommitmentId(newCommitmentId);
+                // Update execution time when commitment changes
+                if (newCommitmentId) {
+                  const selectedCommitment = commitments.find(c => c.commitmentId === newCommitmentId);
+                  if (selectedCommitment && selectedCommitment.timeWindow) {
+                    const now = new Date();
+                    const start = new Date(selectedCommitment.timeWindow.start);
+                    const end = new Date(selectedCommitment.timeWindow.end);
+                    if (now >= start && now <= end) {
+                      setExecutionTime(now.toISOString().slice(0, 16));
+                    } else {
+                      setExecutionTime(start.toISOString().slice(0, 16));
                     }
                   }
-                }}
-              >
-                {commitments.length === 0 ? (
-                  <option value="">No commitments available</option>
-                ) : (
-                  commitments.map((commitment) => (
-                    <option key={commitment.commitmentId} value={commitment.commitmentId}>
-                      {commitment.commitmentId}
-                    </option>
-                  ))
-                )}
-              </select>
-            </div>
+                }
+              }}
+            >
+              {commitments.length === 0 ? (
+                <option value="">No commitments available</option>
+              ) : (
+                commitments.map((commitment) => (
+                  <option key={commitment.commitmentId} value={commitment.commitmentId}>
+                    {commitment.commitmentId}
+                  </option>
+                ))
+              )}
+            </select>
           </div>
-          <div className="session-info">
-            <span className="session-text">Session ID: 0x8F92A1</span>
+        </div>
+        <div className="session-info">
+          <span className="session-text">Session ID: 0x8F92A1</span>
+        </div>
+      </div>
+
+      {/* Two Column Layout */}
+      <div className="execute-content">
+        {/* Left Column - Geospatial Verification */}
+        <div className="verification-panel">
+          <div className="panel-header">
+            <Target size={18} className="panel-icon" />
+            <h2 className="panel-title">Geospatial Verification</h2>
+          </div>
+
+          <div className="verification-cards">
+            {/* Manual Location Entry */}
+            <div className="info-card">
+              <div className="card-header">
+                <h3 className="card-title">MANUAL LOCATION ENTRY</h3>
+              </div>
+              <div className="card-content">
+                <div className="input-wrapper">
+                  <MapPin size={16} className="input-icon" />
+                  <input
+                    type="text"
+                    className="location-input"
+                    placeholder="Enter location name (e.g., Los Angeles, CA)"
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                  />
+                  {isSearching && (
+                    <span className="searching-indicator">Searching...</span>
+                  )}
+                </div>
+                <div className="info-text">
+                  <Info size={14} className="info-icon" />
+                  <span>Manual entry overrides GPS sensor data.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Manual Coordinate Entry */}
+            <div className="info-card">
+              <div className="card-header">
+                <h3 className="card-title">MANUAL COORDINATE ENTRY</h3>
+              </div>
+              <div className="card-content">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', display: 'block' }}>LATITUDE</label>
+                    <div className="input-wrapper">
+                      <Target size={16} className="input-icon" />
+                      <input
+                        type="text"
+                        className={`location-input ${coordinateErrors.latitude ? 'error' : ''}`}
+                        placeholder="e.g., 34.0522"
+                        value={latitudeInput}
+                        onChange={(e) => handleLatitudeChange(e.target.value)}
+                        onBlur={handleLatitudeBlur}
+                      />
+                      {coordinates && (
+                        <span style={{ fontSize: '11px', color: '#6b7280', marginLeft: '4px' }}>
+                          {coordinates.lat >= 0 ? 'N' : 'S'}
+                        </span>
+                      )}
+                    </div>
+                    {coordinateErrors.latitude && (
+                      <span style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px', display: 'block' }}>
+                        {coordinateErrors.latitude}
+                      </span>
+                    )}
+                  </div>
+                  <span style={{ color: '#6b7280', marginTop: '20px' }}>/</span>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', display: 'block' }}>LONGITUDE</label>
+                    <div className="input-wrapper">
+                      <Target size={16} className="input-icon" />
+                      <input
+                        type="text"
+                        className={`location-input ${coordinateErrors.longitude ? 'error' : ''}`}
+                        placeholder="e.g., -118.2437"
+                        value={longitudeInput}
+                        onChange={(e) => handleLongitudeChange(e.target.value)}
+                        onBlur={handleLongitudeBlur}
+                      />
+                      {coordinates && (
+                        <span style={{ fontSize: '11px', color: '#6b7280', marginLeft: '4px' }}>
+                          {coordinates.lng >= 0 ? 'E' : 'W'}
+                        </span>
+                      )}
+                    </div>
+                    {coordinateErrors.longitude && (
+                      <span style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px', display: 'block' }}>
+                        {coordinateErrors.longitude}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="info-text">
+                  <Info size={14} className="info-icon" />
+                  <span>Enter coordinates manually or use location search above.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Coordinate */}
+            <div className="info-card">
+              <div className="card-header">
+                <h3 className="card-title">CURRENT COORDINATE</h3>
+              </div>
+              <div className="card-content">
+                <div className="coordinate-display">
+                  <Target size={16} className="coordinate-icon" />
+                  <span className="coordinate-text">
+                    {coordinates
+                      ? `${coordinates.lat >= 0 ? coordinates.lat.toFixed(4) + '° N' : Math.abs(coordinates.lat).toFixed(4) + '° S'}, ${coordinates.lng >= 0 ? coordinates.lng.toFixed(4) + '° E' : Math.abs(coordinates.lng).toFixed(4) + '° W'}`
+                      : '---.--° N, ---.--° W'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Target Geofence */}
+            <div className="info-card">
+              <div className="card-header">
+                <h3 className="card-title">TARGET GEOFENCE</h3>
+              </div>
+              <div className="card-content">
+                <div className="geofence-display">
+                  <Target size={16} className="geofence-icon" />
+                  <span className="geofence-text">Zone A-42 (Radius: 50m)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Location Status */}
+            <div className="status-card">
+              <div className="card-header">
+                <h3 className="card-title">Location Status</h3>
+              </div>
+              <div className="card-content">
+                <div className="status-display">
+                  <MapPin size={16} className="status-icon" />
+                  <span className="status-text pending">PENDING INPUT</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Time Window */}
+            <div className="status-card">
+              <div className="card-header">
+                <h3 className="card-title">Time Window</h3>
+              </div>
+              <div className="card-content">
+                {selectedCommitmentId && (() => {
+                  const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
+                  if (selectedCommitment && selectedCommitment.timeWindow) {
+                    const start = new Date(selectedCommitment.timeWindow.start);
+                    const end = new Date(selectedCommitment.timeWindow.end);
+                    const now = new Date();
+                    const isActive = now >= start && now <= end;
+                    const timeLeft = end.getTime() - now.getTime();
+                    const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+                    return (
+                      <div className="status-display">
+                        <Clock size={16} className="status-icon" />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span className={`status-text ${isActive ? 'active' : 'pending'}`}>
+                            {isActive ? `ACTIVE ${hoursLeft}:${minutesLeft.toString().padStart(2, '0')} left` : 'INACTIVE'}
+                          </span>
+                          <span style={{ fontSize: '11px', color: '#9ca3af' }}>
+                            {start.toLocaleString()} - {end.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="status-display">
+                      <Clock size={16} className="status-icon" />
+                      <span className="status-text pending">SELECT COMMITMENT</span>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Execution Time */}
+            <div className="info-card">
+              <div className="card-header">
+                <h3 className="card-title">EXECUTION TIME</h3>
+              </div>
+              <div className="card-content">
+                <div className="input-wrapper">
+                  <Clock size={16} className="input-icon" />
+                  <input
+                    type="datetime-local"
+                    className="location-input"
+                    value={executionTime}
+                    onChange={(e) => setExecutionTime(e.target.value)}
+                    min={selectedCommitmentId ? (() => {
+                      const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
+                      if (selectedCommitment && selectedCommitment.timeWindow) {
+                        const start = new Date(selectedCommitment.timeWindow.start);
+                        return start.toISOString().slice(0, 16);
+                      }
+                      return '';
+                    })() : ''}
+                    max={selectedCommitmentId ? (() => {
+                      const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
+                      if (selectedCommitment && selectedCommitment.timeWindow) {
+                        const end = new Date(selectedCommitment.timeWindow.end);
+                        return end.toISOString().slice(0, 16);
+                      }
+                      return '';
+                    })() : ''}
+                  />
+                </div>
+                <div className="info-text">
+                  <Info size={14} className="info-icon" />
+                  <span>Execution time must be within the committed time window.</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Two Column Layout */}
-        <div className="execute-content">
-          {/* Left Column - Geospatial Verification */}
-          <div className="verification-panel">
-            <div className="panel-header">
-              <Target size={18} className="panel-icon" />
-              <h2 className="panel-title">Geospatial Verification</h2>
-            </div>
-
-            <div className="verification-cards">
-              {/* Manual Location Entry */}
-              <div className="info-card">
-                <div className="card-header">
-                  <h3 className="card-title">MANUAL LOCATION ENTRY</h3>
-                </div>
-                <div className="card-content">
-                  <div className="input-wrapper">
-                    <MapPin size={16} className="input-icon" />
-                    <input
-                      type="text"
-                      className="location-input"
-                      placeholder="Enter location name (e.g., Los Angeles, CA)"
-                      value={locationInput}
-                      onChange={(e) => setLocationInput(e.target.value)}
-                    />
-                    {isSearching && (
-                      <span className="searching-indicator">Searching...</span>
-                    )}
-                  </div>
-                  <div className="info-text">
-                    <Info size={14} className="info-icon" />
-                    <span>Manual entry overrides GPS sensor data.</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Manual Coordinate Entry */}
-              <div className="info-card">
-                <div className="card-header">
-                  <h3 className="card-title">MANUAL COORDINATE ENTRY</h3>
-                </div>
-                <div className="card-content">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <div style={{ flex: 1 }}>
-                      <label style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', display: 'block' }}>LATITUDE</label>
-                      <div className="input-wrapper">
-                        <Target size={16} className="input-icon" />
-                        <input
-                          type="text"
-                          className={`location-input ${coordinateErrors.latitude ? 'error' : ''}`}
-                          placeholder="e.g., 34.0522"
-                          value={latitudeInput}
-                          onChange={(e) => handleLatitudeChange(e.target.value)}
-                          onBlur={handleLatitudeBlur}
-                        />
-                        {coordinates && (
-                          <span style={{ fontSize: '11px', color: '#6b7280', marginLeft: '4px' }}>
-                            {coordinates.lat >= 0 ? 'N' : 'S'}
-                          </span>
-                        )}
-                      </div>
-                      {coordinateErrors.latitude && (
-                        <span style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px', display: 'block' }}>
-                          {coordinateErrors.latitude}
-                        </span>
-                      )}
-                    </div>
-                    <span style={{ color: '#6b7280', marginTop: '20px' }}>/</span>
-                    <div style={{ flex: 1 }}>
-                      <label style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', display: 'block' }}>LONGITUDE</label>
-                      <div className="input-wrapper">
-                        <Target size={16} className="input-icon" />
-                        <input
-                          type="text"
-                          className={`location-input ${coordinateErrors.longitude ? 'error' : ''}`}
-                          placeholder="e.g., -118.2437"
-                          value={longitudeInput}
-                          onChange={(e) => handleLongitudeChange(e.target.value)}
-                          onBlur={handleLongitudeBlur}
-                        />
-                        {coordinates && (
-                          <span style={{ fontSize: '11px', color: '#6b7280', marginLeft: '4px' }}>
-                            {coordinates.lng >= 0 ? 'E' : 'W'}
-                          </span>
-                        )}
-                      </div>
-                      {coordinateErrors.longitude && (
-                        <span style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px', display: 'block' }}>
-                          {coordinateErrors.longitude}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="info-text">
-                    <Info size={14} className="info-icon" />
-                    <span>Enter coordinates manually or use location search above.</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Current Coordinate */}
-              <div className="info-card">
-                <div className="card-header">
-                  <h3 className="card-title">CURRENT COORDINATE</h3>
-                </div>
-                <div className="card-content">
-                  <div className="coordinate-display">
-                    <Target size={16} className="coordinate-icon" />
-                    <span className="coordinate-text">
-                      {coordinates
-                        ? `${coordinates.lat >= 0 ? coordinates.lat.toFixed(4) + '° N' : Math.abs(coordinates.lat).toFixed(4) + '° S'}, ${coordinates.lng >= 0 ? coordinates.lng.toFixed(4) + '° E' : Math.abs(coordinates.lng).toFixed(4) + '° W'}`
-                        : '---.--° N, ---.--° W'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Target Geofence */}
-              <div className="info-card">
-                <div className="card-header">
-                  <h3 className="card-title">TARGET GEOFENCE</h3>
-                </div>
-                <div className="card-content">
-                  <div className="geofence-display">
-                    <Target size={16} className="geofence-icon" />
-                    <span className="geofence-text">Zone A-42 (Radius: 50m)</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Location Status */}
-              <div className="status-card">
-                <div className="card-header">
-                  <h3 className="card-title">Location Status</h3>
-                </div>
-                <div className="card-content">
-                  <div className="status-display">
-                    <MapPin size={16} className="status-icon" />
-                    <span className="status-text pending">PENDING INPUT</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Time Window */}
-              <div className="status-card">
-                <div className="card-header">
-                  <h3 className="card-title">Time Window</h3>
-                </div>
-                <div className="card-content">
-                  {selectedCommitmentId && (() => {
-                    const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
-                    if (selectedCommitment && selectedCommitment.timeWindow) {
-                      const start = new Date(selectedCommitment.timeWindow.start);
-                      const end = new Date(selectedCommitment.timeWindow.end);
-                      const now = new Date();
-                      const isActive = now >= start && now <= end;
-                      const timeLeft = end.getTime() - now.getTime();
-                      const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-                      const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                      
-                      return (
-                        <div className="status-display">
-                          <Clock size={16} className="status-icon" />
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <span className={`status-text ${isActive ? 'active' : 'pending'}`}>
-                              {isActive ? `ACTIVE ${hoursLeft}:${minutesLeft.toString().padStart(2, '0')} left` : 'INACTIVE'}
-                            </span>
-                            <span style={{ fontSize: '11px', color: '#9ca3af' }}>
-                              {start.toLocaleString()} - {end.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    }
-                    return (
-                  <div className="status-display">
-                    <Clock size={16} className="status-icon" />
-                        <span className="status-text pending">SELECT COMMITMENT</span>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              {/* Execution Time */}
-              <div className="info-card">
-                <div className="card-header">
-                  <h3 className="card-title">EXECUTION TIME</h3>
-                </div>
-                <div className="card-content">
-                  <div className="input-wrapper">
-                    <Clock size={16} className="input-icon" />
-                    <input
-                      type="datetime-local"
-                      className="location-input"
-                      value={executionTime}
-                      onChange={(e) => setExecutionTime(e.target.value)}
-                      min={selectedCommitmentId ? (() => {
-                        const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
-                        if (selectedCommitment && selectedCommitment.timeWindow) {
-                          const start = new Date(selectedCommitment.timeWindow.start);
-                          return start.toISOString().slice(0, 16);
-                        }
-                        return '';
-                      })() : ''}
-                      max={selectedCommitmentId ? (() => {
-                        const selectedCommitment = commitments.find(c => c.commitmentId === selectedCommitmentId);
-                        if (selectedCommitment && selectedCommitment.timeWindow) {
-                          const end = new Date(selectedCommitment.timeWindow.end);
-                          return end.toISOString().slice(0, 16);
-                        }
-                        return '';
-                      })() : ''}
-                    />
-                  </div>
-                  <div className="info-text">
-                    <Info size={14} className="info-icon" />
-                    <span>Execution time must be within the committed time window.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Right Column - Evidence Upload */}
+        <div className="evidence-panel">
+          <div className="panel-header">
+            <Folder size={18} className="panel-icon" />
+            <h2 className="panel-title">Evidence Upload</h2>
           </div>
 
-          {/* Right Column - Evidence Upload */}
-          <div className="evidence-panel">
-            <div className="panel-header">
-              <Folder size={18} className="panel-icon" />
-              <h2 className="panel-title">Evidence Upload</h2>
+          <div className="evidence-content">
+            {/* Upload Area */}
+            <div
+              className={`upload-area ${isDragging ? 'dragging' : ''}`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => document.getElementById('file-input')?.click()}
+            >
+              <Upload size={32} className="upload-icon" />
+              <p className="upload-text">Click to upload or drag and drop</p>
+              <p className="upload-formats">SVG, PNG, JPG or PDF (MAX. 10MB)</p>
+              <input
+                id="file-input"
+                type="file"
+                multiple
+                className="file-input-hidden"
+                onChange={(e) => handleFileUpload(e.target.files)}
+                accept=".svg,.png,.jpg,.jpeg,.pdf"
+              />
             </div>
 
-            <div className="evidence-content">
-              {/* Upload Area */}
-              <div
-                className={`upload-area ${isDragging ? 'dragging' : ''}`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={() => document.getElementById('file-input')?.click()}
-              >
-                <Upload size={32} className="upload-icon" />
-                <p className="upload-text">Click to upload or drag and drop</p>
-                <p className="upload-formats">SVG, PNG, JPG or PDF (MAX. 10MB)</p>
-                <input
-                  id="file-input"
-                  type="file"
-                  multiple
-                  className="file-input-hidden"
-                  onChange={(e) => handleFileUpload(e.target.files)}
-                  accept=".svg,.png,.jpg,.jpeg,.pdf"
-                />
-              </div>
-
-              {/* Uploaded Files List */}
-              {uploadedFiles.length > 0 && (
-                <div className="uploaded-files">
-                  {uploadedFiles.map((file, index) => (
-                    <div key={index} className="file-item">
-                      <FileText size={16} className="file-icon" />
-                      <div className="file-info">
-                        <span className="file-name">{file.name}</span>
-                        <span className="file-meta">{file.size} • {file.time}</span>
-                      </div>
-                      <button
-                        className="file-remove"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFile(index);
-                        }}
-                      >
-                        <X size={16} />
-                      </button>
+            {/* Uploaded Files List */}
+            {uploadedFiles.length > 0 && (
+              <div className="uploaded-files">
+                {uploadedFiles.map((file, index) => (
+                  <div key={index} className="file-item">
+                    <FileText size={16} className="file-icon" />
+                    <div className="file-info">
+                      <span className="file-name">{file.name}</span>
+                      <span className="file-meta">{file.size} • {file.time}</span>
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Operator Notes */}
-              <div className="form-group">
-                <label className="form-label">Operator Notes</label>
-                <textarea
-                  className="form-textarea"
-                  placeholder="Add any additional context for verification..."
-                  value={operatorNotes}
-                  onChange={(e) => setOperatorNotes(e.target.value)}
-                  rows={4}
-                />
+                    <button
+                      className="file-remove"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFile(index);
+                      }}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
               </div>
+            )}
 
-              {/* API Error Display */}
-              {apiError && (
-                <div className="warning-box" style={{ backgroundColor: '#7f1d1d', borderColor: '#991b1b', marginBottom: '16px' }}>
-                  <AlertTriangle size={18} className="warning-icon" />
-                  <p className="warning-text" style={{ color: '#fca5a5' }}>
-                    {apiError}
-                  </p>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <button 
-                className="submit-btn" 
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-              >
-                <Rocket size={18} />
-                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT EXECUTION'}
-              </button>
-
-              {/* Cancel Link */}
-              <a href="#" className="cancel-link">
-                Report Issue / Cancel
-              </a>
+            {/* Operator Notes */}
+            <div className="form-group">
+              <label className="form-label">Operator Notes</label>
+              <textarea
+                className="form-textarea"
+                placeholder="Add any additional context for verification..."
+                value={operatorNotes}
+                onChange={(e) => setOperatorNotes(e.target.value)}
+                rows={4}
+              />
             </div>
+
+            {/* API Error Display */}
+            {apiError && (
+              <div className="warning-box" style={{ backgroundColor: '#7f1d1d', borderColor: '#991b1b', marginBottom: '16px' }}>
+                <AlertTriangle size={18} className="warning-icon" />
+                <p className="warning-text" style={{ color: '#fca5a5' }}>
+                  {apiError}
+                </p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              <Rocket size={18} />
+              {isSubmitting ? 'SUBMITTING...' : 'SUBMIT EXECUTION'}
+            </button>
+
+            {/* Cancel Link */}
+            <a href="#" className="cancel-link">
+              Report Issue / Cancel
+            </a>
           </div>
         </div>
       </div>
 
       {/* Success Modal */}
-      {executionResult && (
-        <div className="success-modal-overlay" onClick={() => setExecutionResult(null)}>
-          <div className="success-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close"
-              onClick={() => setExecutionResult(null)}
-            >
-              <X size={20} />
-            </button>
-            <div className="success-content">
-              <CheckCircle2 size={64} className="success-icon" />
-              <h2 className="success-title">EXECUTION SUBMITTED</h2>
-              <p className="success-message">
-                Your task execution has been verified and proof has been generated.
-              </p>
-              <div className="commitment-details">
-                <div className="detail-row">
-                  <span className="detail-label">Proof Hash:</span>
-                  <span className="detail-value hash">{executionResult.poeHash.substring(0, 20)}...</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Timestamp:</span>
-                  <span className="detail-value">
-                    {new Date(executionResult.timestamp).toLocaleString()}
-                  </span>
+      {
+        executionResult && (
+          <div className="success-modal-overlay" onClick={() => setExecutionResult(null)}>
+            <div className="success-modal" onClick={(e) => e.stopPropagation()}>
+              <button
+                className="modal-close"
+                onClick={() => setExecutionResult(null)}
+              >
+                <X size={20} />
+              </button>
+              <div className="success-content">
+                <CheckCircle2 size={64} className="success-icon" />
+                <h2 className="success-title">EXECUTION SUBMITTED</h2>
+                <p className="success-message">
+                  Your task execution has been verified and proof has been generated.
+                </p>
+                <div className="commitment-details">
+                  <div className="detail-row">
+                    <span className="detail-label">Proof Hash:</span>
+                    <span className="detail-value hash">{executionResult.poeHash.substring(0, 20)}...</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Timestamp:</span>
+                    <span className="detail-value">
+                      {new Date(executionResult.timestamp).toLocaleString()}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </Layout>
+        )
+      }
+    </div >
   );
 };
 

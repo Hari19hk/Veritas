@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { FileCode, Clock, Hash, AlignLeft, Calendar } from 'lucide-react';
-import Layout from './Layout';
 import './Dashboard.css'; // Reusing dashboard styles for consistency
 
 interface Commitment {
@@ -32,7 +31,7 @@ const Logs = () => {
   }, []);
 
   return (
-    <Layout breadcrumb="logs">
+    <div className="dashboard-content">
       <div className="content-header">
         <div>
           <h2 className="page-title">Execution Logs</h2>
@@ -117,7 +116,7 @@ const Logs = () => {
           )}
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

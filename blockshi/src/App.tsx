@@ -1,24 +1,89 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import Landing from './components/LandingPage.tsx';
+import VerifyExecutionProof from './components/VerifyExecutionProof';
+import ProofOfExecution from './components/ProofOfExecution';
+
 import Dashboard from './components/Dashboard';
 import CreateCommitment from './components/CreateCommitment';
 import ExecuteTask from './components/ExecuteTask';
-import ProofOfExecution from './components/ProofOfExecution';
-import VerifyExecutionProof from './components/VerifyExecutionProof';
 import Logs from './components/Logs';
 import Settings from './components/Settings';
-import './App.css';
+
+import DashboardShell from './components/DashboardShell';
+import RequireAuth from './auth/RequireAuth.tsx';
+import Login from './components/Login.tsx';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/create-commitment" element={<CreateCommitment />} />
-        <Route path="/execute-task" element={<ExecuteTask />} />
-        <Route path="/proof-of-execution" element={<ProofOfExecution />} />
-        <Route path="/verify-execution-proof" element={<VerifyExecutionProof />} />
-        <Route path="/logs" element={<Logs />} />
-        <Route path="/settings" element={<Settings />} />
+        {/* Public */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/verify" element={<VerifyExecutionProof />} />
+        <Route path="/proof/:proofId" element={<ProofOfExecution />} />
+
+        {/* Authenticated App */}
+        <Route
+          path="/app/dashboard"
+          element={
+            <RequireAuth>
+              <DashboardShell breadcrumb="dashboard">
+                <Dashboard />
+              </DashboardShell>
+            </RequireAuth>
+            
+          }
+        />
+
+        <Route
+          path="/app/create-commitment"
+          element={
+            <RequireAuth>
+              <DashboardShell breadcrumb="dashboard / create commitment">
+                <CreateCommitment />
+              </DashboardShell>
+            </RequireAuth>
+           
+          }
+        />
+
+        <Route
+          path="/app/execute-task"
+          element={
+            <RequireAuth>
+              <DashboardShell breadcrumb="dashboard / execute task">
+                <ExecuteTask />
+              </DashboardShell>
+            </RequireAuth>
+           
+          }
+        />
+
+        <Route
+          path="/app/logs"
+          element={
+            <RequireAuth>
+              <DashboardShell breadcrumb="dashboard / logs">
+                <Logs />
+              </DashboardShell>
+            </RequireAuth>
+            
+          }
+        />
+
+        <Route
+          path="/app/settings"
+          element={
+            <RequireAuth>
+              <DashboardShell breadcrumb="dashboard / settings">
+                <Settings />
+              </DashboardShell>
+            </RequireAuth>
+           
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -8,7 +8,6 @@ import {
   Eye,
   Play
 } from 'lucide-react';
-import Layout from './Layout';
 import './Dashboard.css';
 
 interface Task {
@@ -66,7 +65,7 @@ const Dashboard = () => {
   };
 
   return (
-    <Layout breadcrumb="dashboard">
+    <div className="dashboard-content">
       <div className="content-header">
         <div>
           <h2 className="page-title">Dashboard Overview</h2>
@@ -210,7 +209,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 
