@@ -1,0 +1,60 @@
+<svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="450" fill="#0a0a0a"/>
+  
+  <!-- Grid pattern -->
+  <defs>
+    <pattern id="grid6" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="450" fill="url(#grid6)"/>
+  
+  <!-- Main content area -->
+  <rect x="100" y="50" width="600" height="350" rx="12" fill="url(#grad6)" stroke="#10b981" stroke-width="2"/>
+  
+  <!-- Title -->
+  <text x="400" y="100" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#10b981" text-anchor="middle">On-Chain Settlement</text>
+  
+  <!-- Blockchain blocks -->
+  <rect x="180" y="180" width="80" height="80" rx="6" fill="#1a1a1a" stroke="#6b7280" stroke-width="2"/>
+  <text x="220" y="225" font-family="monospace" font-size="12" fill="#6b7280" text-anchor="middle">Block</text>
+  <text x="220" y="240" font-family="monospace" font-size="12" fill="#6b7280" text-anchor="middle">N-1</text>
+  
+  <rect x="290" y="180" width="80" height="80" rx="6" fill="#1a1a1a" stroke="#6b7280" stroke-width="2"/>
+  <text x="330" y="225" font-family="monospace" font-size="12" fill="#6b7280" text-anchor="middle">Block</text>
+  <text x="330" y="240" font-family="monospace" font-size="12" fill="#6b7280" text-anchor="middle">N</text>
+  
+  <rect x="400" y="180" width="80" height="80" rx="6" fill="#1a1a1a" stroke="#10b981" stroke-width="3"/>
+  <text x="440" y="225" font-family="monospace" font-size="12" fill="#10b981" text-anchor="middle">Block</text>
+  <text x="440" y="240" font-family="monospace" font-size="12" fill="#10b981" text-anchor="middle">N+1</text>
+  
+  <!-- Chain connections -->
+  <line x1="260" y1="220" x2="290" y2="220" stroke="#6b7280" stroke-width="2"/>
+  <line x1="370" y1="220" x2="400" y2="220" stroke="#10b981" stroke-width="2"/>
+  
+  <!-- Checkmark on new block -->
+  <path d="M 425 200 L 440 215 L 460 190" stroke="#10b981" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Status indicators -->
+  <rect x="200" y="300" width="400" height="70" rx="6" fill="#1a1a1a" stroke="#10b981" stroke-width="1"/>
+  
+  <circle cx="230" cy="325" r="5" fill="#10b981"/>
+  <text x="245" y="330" font-family="monospace" font-size="12" fill="#10b981">Proof Verified</text>
+  
+  <circle cx="230" cy="350" r="5" fill="#10b981"/>
+  <text x="245" y="355" font-family="monospace" font-size="12" fill="#10b981">Block Confirmed</text>
+  
+  <circle cx="430" cy="325" r="5" fill="#10b981"/>
+  <text x="445" y="330" font-family="monospace" font-size="12" fill="#10b981">Payment Released</text>
+  
+  <circle cx="430" cy="350" r="5" fill="#10b981"/>
+  <text x="445" y="355" font-family="monospace" font-size="12" fill="#10b981">Immutable Record</text>
+</svg>

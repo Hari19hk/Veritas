@@ -13,12 +13,12 @@ import {
 
 // Using static paths from public/assets to ensure reliable loading
 const images = {
-  timeline_task_planning: "/assets/timeline_task_planning.png",
-  timeline_gateway_rules: "/assets/timeline_gateway_rules.png",
-  timeline_secure_upload: "/assets/timeline_secure_upload.png",
-  timeline_execution_engine: "/assets/timeline_execution_engine.png",
-  timeline_proof_generation: "/assets/timeline_proof_generation.png",
-  timeline_blockchain_finality: "/assets/timeline_blockchain_finality.png"
+  timeline_task_planning: "/assets/timeline_task_planning.svg",
+  timeline_gateway_rules: "/assets/timeline_gateway_rules.svg",
+  timeline_secure_upload: "/assets/timeline_secure_upload.svg",
+  timeline_execution_engine: "/assets/timeline_execution_engine.svg",
+  timeline_proof_generation: "/assets/timeline_proof_generation.svg",
+  timeline_blockchain_finality: "/assets/timeline_blockchain_finality.svg"
 };
 
 const Landing = () => {

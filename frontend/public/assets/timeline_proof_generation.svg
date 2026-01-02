@@ -1,0 +1,54 @@
+<svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="450" fill="#0a0a0a"/>
+  
+  <!-- Grid pattern -->
+  <defs>
+    <pattern id="grid5" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="450" fill="url(#grid5)"/>
+  
+  <!-- Main content area -->
+  <rect x="100" y="50" width="600" height="350" rx="12" fill="url(#grad5)" stroke="#10b981" stroke-width="2"/>
+  
+  <!-- Title -->
+  <text x="400" y="100" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#10b981" text-anchor="middle">ZK-Proof Generation</text>
+  
+  <!-- Mathematical symbols -->
+  <text x="200" y="160" font-family="serif" font-size="24" fill="#10b981" opacity="0.6">π</text>
+  <text x="250" y="180" font-family="serif" font-size="20" fill="#10b981" opacity="0.5">∑</text>
+  <text x="550" y="170" font-family="serif" font-size="22" fill="#10b981" opacity="0.6">∫</text>
+  <text x="600" y="190" font-family="serif" font-size="20" fill="#10b981" opacity="0.5">∀</text>
+  
+  <!-- Circuit representation -->
+  <circle cx="300" cy="225" r="30" fill="#1a1a1a" stroke="#10b981" stroke-width="2"/>
+  <circle cx="400" cy="225" r="30" fill="#1a1a1a" stroke="#10b981" stroke-width="2"/>
+  <circle cx="500" cy="225" r="30" fill="#1a1a1a" stroke="#10b981" stroke-width="2"/>
+  
+  <line x1="330" y1="225" x2="370" y2="225" stroke="#10b981" stroke-width="2"/>
+  <line x1="430" y1="225" x2="470" y2="225" stroke="#10b981" stroke-width="2"/>
+  
+  <!-- Labels -->
+  <text x="300" y="232" font-family="monospace" font-size="14" fill="#10b981" text-anchor="middle">C1</text>
+  <text x="400" y="232" font-family="monospace" font-size="14" fill="#10b981" text-anchor="middle">C2</text>
+  <text x="500" y="232" font-family="monospace" font-size="14" fill="#10b981" text-anchor="middle">C3</text>
+  
+  <!-- Info box -->
+  <rect x="200" y="280" width="400" height="80" rx="6" fill="#1a1a1a" stroke="#10b981" stroke-width="1"/>
+  <text x="220" y="305" font-family="monospace" font-size="12" fill="#10b981">Protocol: Groth16</text>
+  <text x="220" y="325" font-family="monospace" font-size="12" fill="#10b981">Curve: BN254</text>
+  <text x="220" y="345" font-family="monospace" font-size="12" fill="#10b981">Constraints: ~2M</text>
+  
+  <text x="450" y="305" font-family="monospace" font-size="12" fill="#6b7280">zk-SNARK</text>
+  <text x="450" y="325" font-family="monospace" font-size="12" fill="#6b7280">Succinct</text>
+  <text x="450" y="345" font-family="monospace" font-size="12" fill="#6b7280">Non-Interactive</text>
+</svg>
