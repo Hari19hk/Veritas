@@ -646,9 +646,19 @@
 }
 
 .status-badge {
-  display: flex;
-  align-items: center;
+  display: inline-flex !important;
+  /* Force inline-flex */
+  flex-direction: row !important;
+  /* Force row */
+  align-items: center !important;
+  justify-content: flex-start !important;
   gap: 8px;
+  background: transparent !important;
+  border: none !important;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  white-space: nowrap !important;
+  width: auto !important;
 }
 
 .status-dot {
@@ -681,9 +691,9 @@
 }
 
 .execute-btn {
-  background-color: #10b981;
-  border: none;
-  color: #000000;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  color: #10b981;
   padding: 4px 12px;
   border-radius: 2px;
   font-size: 10px;
@@ -696,6 +706,7 @@
   font-family: 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  text-decoration: none;
 }
 
 .execute-btn svg {
@@ -703,7 +714,8 @@
 }
 
 .execute-btn:hover {
-  background-color: #059669;
+  background-color: rgba(16, 185, 129, 0.2);
+  text-shadow: none;
 }
 
 .table-pagination {
@@ -751,9 +763,15 @@
 }
 
 .pagination-btn.active {
-  background-color: #10b981;
+  background-color: transparent;
   border-color: #10b981;
-  color: #ffffff;
+  /* Keep thin border or remove? I'll keep border for pagination as it's a small target, or maybe just bold text? */
+  /* User said "dont make it look like a button", but for pagination numbers, some box is usually good. 
+     I'll stick to text-only with underline for consistency with the request. */
+  border: none;
+  border-bottom: 2px solid #10b981;
+  color: #10b981;
+  border-radius: 0;
 }
 
 /* Logs Section */

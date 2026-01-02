@@ -38,11 +38,11 @@ export const createCommitment = async (
   data: CreateCommitmentRequest
 ): Promise<CreateCommitmentResponse> => {
   const timestamp = new Date().toISOString();
-  
+
   // Log API call
   console.log(`[${timestamp}] API Call: POST ${API_BASE_URL}/commit`);
   console.log('Request payload:', JSON.stringify(data, null, 2));
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/commit`, {
       method: 'POST',
@@ -59,11 +59,11 @@ export const createCommitment = async (
     }
 
     const responseData = await response.json();
-    
+
     // Log successful response
     console.log(`[${new Date().toISOString()}] API Response: Success`);
     console.log('Response data:', JSON.stringify(responseData, null, 2));
-    
+
     return responseData;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
@@ -105,11 +105,11 @@ export const executeTask = async (
   data: ExecuteTaskRequest
 ): Promise<ExecuteTaskResponse> => {
   const timestamp = new Date().toISOString();
-  
+
   // Log API call
   console.log(`[${timestamp}] API Call: POST ${API_BASE_URL}/execute`);
   console.log('Request payload:', JSON.stringify(data, null, 2));
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/execute`, {
       method: 'POST',
@@ -126,11 +126,11 @@ export const executeTask = async (
     }
 
     const responseData = await response.json();
-    
+
     // Log successful response
     console.log(`[${new Date().toISOString()}] API Response: Success`);
     console.log('Response data:', JSON.stringify(responseData, null, 2));
-    
+
     return responseData;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
@@ -156,7 +156,7 @@ export const hashFiles = async (files: File[]): Promise<string> => {
   if (files.length === 0) {
     return '';
   }
-  
+
   const hashes = await Promise.all(files.map(file => hashFile(file)));
   const combined = hashes.join('');
   const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(combined));
@@ -184,9 +184,9 @@ export interface Commitment {
  */
 export const getAllCommitments = async (): Promise<Commitment[]> => {
   const timestamp = new Date().toISOString();
-  
+
   console.log(`[${timestamp}] API Call: GET ${API_BASE_URL}/commitments`);
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/commitments`, {
       method: 'GET',
@@ -202,10 +202,10 @@ export const getAllCommitments = async (): Promise<Commitment[]> => {
     }
 
     const responseData = await response.json();
-    
+
     console.log(`[${new Date().toISOString()}] API Response: Success (${responseData.length} commitments)`);
     console.log('Commitments:', JSON.stringify(responseData, null, 2));
-    
+
     return responseData;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
@@ -218,9 +218,9 @@ export const getAllCommitments = async (): Promise<Commitment[]> => {
  */
 export const getCommitmentById = async (commitmentId: string): Promise<Commitment> => {
   const timestamp = new Date().toISOString();
-  
+
   console.log(`[${timestamp}] API Call: GET ${API_BASE_URL}/commitments/${commitmentId}`);
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/commitments/${commitmentId}`, {
       method: 'GET',
@@ -236,10 +236,10 @@ export const getCommitmentById = async (commitmentId: string): Promise<Commitmen
     }
 
     const responseData = await response.json();
-    
+
     console.log(`[${new Date().toISOString()}] API Response: Success`);
     console.log('Commitment:', JSON.stringify(responseData, null, 2));
-    
+
     return responseData;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
@@ -265,9 +265,9 @@ export interface Proof {
  */
 export const getProofByHash = async (poeHash: string): Promise<Proof> => {
   const timestamp = new Date().toISOString();
-  
+
   console.log(`[${timestamp}] API Call: GET ${API_BASE_URL}/proofs/${poeHash}`);
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/proofs/${poeHash}`, {
       method: 'GET',
@@ -283,10 +283,10 @@ export const getProofByHash = async (poeHash: string): Promise<Proof> => {
     }
 
     const responseData = await response.json();
-    
+
     console.log(`[${new Date().toISOString()}] API Response: Success`);
     console.log('Proof:', JSON.stringify(responseData, null, 2));
-    
+
     return responseData;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
@@ -299,9 +299,9 @@ export const getProofByHash = async (poeHash: string): Promise<Proof> => {
  */
 export const getAllProofs = async (): Promise<Proof[]> => {
   const timestamp = new Date().toISOString();
-  
+
   console.log(`[${timestamp}] API Call: GET ${API_BASE_URL}/proofs`);
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/proofs`, {
       method: 'GET',
@@ -317,10 +317,10 @@ export const getAllProofs = async (): Promise<Proof[]> => {
     }
 
     const responseData = await response.json();
-    
+
     console.log(`[${new Date().toISOString()}] API Response: Success (${responseData.length} proofs)`);
     console.log('Proofs:', JSON.stringify(responseData, null, 2));
-    
+
     return responseData;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] API Call Failed:`, error);
@@ -347,9 +347,9 @@ export interface VerifyProofResponse {
  */
 export const verifyProof = async (poeHash: string): Promise<VerifyProofResponse> => {
   const timestamp = new Date().toISOString();
-  
+
   console.log(`[${timestamp}] API Call: GET ${API_BASE_URL}/verify?poeHash=${poeHash}`);
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/verify?poeHash=${encodeURIComponent(poeHash)}`, {
       method: 'GET',
@@ -365,10 +365,10 @@ export const verifyProof = async (poeHash: string): Promise<VerifyProofResponse>
     }
 
     const responseData = await response.json();
-    
+
     console.log(`[${new Date().toISOString()}] API Response: Success`);
     console.log('Verification result:', JSON.stringify(responseData, null, 2));
-    
+
     return responseData;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] API Call Failed:`, error);

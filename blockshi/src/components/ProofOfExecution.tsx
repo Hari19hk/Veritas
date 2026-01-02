@@ -32,11 +32,11 @@ const ProofOfExecution = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Load all proofs first
         const proofs = await getAllProofs();
         setAllProofs(proofs);
-        
+
         // If poeHash in URL, load that specific proof
         if (poeHashFromUrl) {
           try {
@@ -48,7 +48,7 @@ const ProofOfExecution = () => {
           }
         } else if (proofs.length > 0) {
           // Otherwise, use the most recent proof
-          const mostRecent = proofs.sort((a, b) => 
+          const mostRecent = proofs.sort((a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )[0];
           setProof(mostRecent);
