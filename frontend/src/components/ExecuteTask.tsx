@@ -371,7 +371,7 @@ const ExecuteTask = () => {
           lng: finalLng,
         },
         executionTime: executionTimeISO,
-        ...(evidenceFileHash && { evidenceFileHash }),
+        evidenceFile: uploadedFiles.length > 0 ? uploadedFiles[0].file : undefined,
       };
 
       console.log('[ExecuteTask] Making API call with data:', requestData);

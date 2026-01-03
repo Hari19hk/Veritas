@@ -101,22 +101,35 @@ export interface ExecuteTaskResponse {
 /**
  * Executes a task via the backend API
  */
+/**
+ * Executes a task via the backend API
+ */
 export const executeTask = async (
-  data: ExecuteTaskRequest
+  data: ExecuteTaskRequest & { evidenceFile?: File }
 ): Promise<ExecuteTaskResponse> => {
   const timestamp = new Date().toISOString();
 
   // Log API call
   console.log(`[${timestamp}] API Call: POST ${API_BASE_URL}/execute`);
-  console.log('Request payload:', JSON.stringify(data, null, 2));
+  // Note: We can't easily stringify FormData for logging, so using data object
+  console.log('Request data:', data);
 
   try {
+    const formData = new FormData();
+    formData.append('commitmentId', data.commitmentId);
+    formData.append('executionTime', data.executionTime);
+    // Stringify complex object
+    formData.append('executionLocation', JSON.stringify(data.executionLocation));
+
+    // Add file if present
+    if (data.evidenceFile) {
+      formData.append('evidenceFile', data.evidenceFile);
+    }
+
     const response = await fetch(`${API_BASE_URL}/execute`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+      // No Content-Type header needed; fetch sets it with boundary for FormData
+      body: formData,
     });
 
     if (!response.ok) {
@@ -329,7 +342,7 @@ export const getAllProofs = async (): Promise<Proof[]> => {
 };
 
 // Explicit type re-export for compatibility
-export type { Proof };
+// export type { Proof };
 
 export interface VerifyProofResponse {
   valid: boolean;

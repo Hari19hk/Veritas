@@ -1,9 +1,10 @@
-import { db } from '../config/firebase.js';
+import { db, storage } from '../config/firebase.js';
+import crypto from 'crypto';
 import { generatePoEHash } from '../utils/crypto.js';
 import { getDistanceFromLatLonInMeters } from '../utils/geo.js';
 import { storeProofOnChain } from '../blockchain/poeContract.js';
 
-
+const bucket = storage.bucket(); // Uses default bucket from config
 
 const ALLOWED_RADIUS_METERS = 200; // MVP constraint
 
@@ -16,11 +17,16 @@ const ALLOWED_RADIUS_METERS = 200; // MVP constraint
  * @returns {object} Proof data
  */
 const executeTask = async (data) => {
-  console.log('🔥 executeTask called with:', data);
+  console.log('🔥 executeTask called');
 
-  const { commitmentId, executionLocation, executionTime } = data;
+  const {
+    commitmentId,
+    executionLocation,
+    executionTime,
+    evidenceFile
+  } = data;
 
-  // Helper: strict UTC date parser
+  /* ----------------------------- helpers ----------------------------- */
   const parseUtc = (value) => {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) {
@@ -29,17 +35,16 @@ const executeTask = async (data) => {
     return d;
   };
 
-  // 1. Validate Input
-  if (!commitmentId || !executionLocation || !executionTime) {
+  /* -------------------------- 1. validation -------------------------- */
+  if (!commitmentId || !executionLocation || !executionTime || !evidenceFile) {
     throw new Error('Missing required fields');
   }
 
-  // Enforce ISO UTC time from client
   if (!executionTime.endsWith('Z')) {
-    throw new Error('executionTime must be an ISO UTC string (use toISOString())');
+    throw new Error('executionTime must be ISO UTC (use toISOString())');
   }
 
-  // 2. Fetch Commitment from Firestore
+  /* -------------------- 2. fetch commitment --------------------------- */
   const commitmentDoc = await db
     .collection('commitments')
     .doc(commitmentId)
@@ -51,30 +56,16 @@ const executeTask = async (data) => {
 
   const commitment = commitmentDoc.data();
 
-  // 3. Validate Time Window (UTC-safe)
+  /* ------------------- 3. validate time window ------------------------ */
   const execTime = parseUtc(executionTime);
   const startTime = parseUtc(commitment.timeWindow.start);
   const endTime = parseUtc(commitment.timeWindow.end);
-
-  console.log('--- TIME DEBUG START ---');
-  console.log('Raw executionTime:', executionTime);
-  console.log('Parsed execTime (ISO):', execTime.toISOString());
-  console.log('Commitment start (raw):', commitment.timeWindow.start);
-  console.log('Commitment end (raw):', commitment.timeWindow.end);
-  console.log('Parsed startTime (ISO):', startTime.toISOString());
-  console.log('Parsed endTime (ISO):', endTime.toISOString());
-  console.log('Comparison results:', {
-    exec_lt_start: execTime < startTime,
-    exec_gt_end: execTime > endTime
-  });
-  console.log('--- TIME DEBUG END ---');
 
   if (execTime < startTime || execTime > endTime) {
     throw new Error('Execution time is outside the committed time window');
   }
 
-
-  // 4. Validate Location
+  /* ------------------- 4. validate location --------------------------- */
   const distance = getDistanceFromLatLonInMeters(
     commitment.location.lat,
     commitment.location.lng,
@@ -83,45 +74,78 @@ const executeTask = async (data) => {
   );
 
   if (distance > ALLOWED_RADIUS_METERS) {
-    throw new Error(`Execution location is too far (${Math.round(distance)}m)`);
+    throw new Error(`Execution location too far (${Math.round(distance)}m). Expected: [${commitment.location.lat}, ${commitment.location.lng}], Received: [${executionLocation.lat}, ${executionLocation.lng}]`);
   }
 
-  // 5. Generate PoE Hash
+  /* ------------------- 5. upload evidence ----------------------------- */
+  const evidenceHash = crypto
+    .createHash('sha256')
+    .update(evidenceFile.buffer)
+    .digest('hex');
+
+  const evidencePath = `evidences/${commitmentId}/${Date.now()}_${evidenceHash}`;
+
+  const file = bucket.file(evidencePath);
+
+  await file.save(evidenceFile.buffer, {
+    metadata: {
+      contentType: evidenceFile.mimetype
+    }
+  });
+
+  const [fileUrl] = await file.getSignedUrl({
+    action: 'read',
+    expires: '03-01-2030'
+  });
+
+  /* ------------------- 6. generate PoE hash --------------------------- */
   const poeHash = generatePoEHash({
     commitmentId,
     timestamp: execTime.toISOString(),
     latitude: executionLocation.lat,
-    longitude: executionLocation.lng
+    longitude: executionLocation.lng,
+    evidenceHash
   });
 
-  console.log(`[DEBUG] Generated PoE Hash: ${poeHash}`);
-  console.log(`[DEBUG] Hash Length: ${poeHash.length}`);
+  console.log('[DEBUG] PoE hash:', poeHash);
 
-
-  // 6. Create Proof Object (normalized UTC)
+  /* ------------------- 7. create proof object ------------------------- */
   const proof = {
     poeHash,
     commitmentId,
     executionLocation,
     executionTime: execTime.toISOString(),
+    evidence: {
+      hash: evidenceHash,
+      url: fileUrl,
+      path: evidencePath,
+      mimeType: evidenceFile.mimetype
+    },
     status: 'PROOF_GENERATED',
     createdAt: new Date().toISOString()
   };
 
-  // 7. Store Proof in Firestore
-  await db
-    .collection('proofs')
-    .doc(poeHash)
-    .set(proof);
+  /* ------------------- 8. store proof metadata ------------------------ */
+  await db.collection('proofs').doc(poeHash).set(proof);
 
-  // 8. Anchor Proof on Blockchain
+  await db.collection('evidences').doc(evidenceHash).set({
+    commitmentId,
+    poeHash,
+    fileUrl,
+    filePath: evidencePath,
+    uploadedAt: new Date().toISOString()
+  });
+
+  /* ------------------- 9. anchor on blockchain ------------------------ */
   const { txHash } = await storeProofOnChain(commitmentId, poeHash);
 
+  /* ------------------- 10. return result ------------------------------ */
   return {
     ...proof,
     blockchainTx: txHash
   };
 };
+
 
 
 export const getProofByHash = async (poeHash) => {
