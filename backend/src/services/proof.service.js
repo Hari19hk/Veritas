@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { generatePoEHash } from '../utils/crypto.js';
 import { getDistanceFromLatLonInMeters } from '../utils/geo.js';
 import { storeProofOnChain } from '../blockchain/poeContract.js';
+import { analyzeEvidenceImage } from './vision.service.js';
 
 const bucket = storage.bucket(); // Uses default bucket from config
 
@@ -16,6 +17,29 @@ const ALLOWED_RADIUS_METERS = 200; // MVP constraint
  * @param {string} data.executionTime
  * @returns {object} Proof data
  */
+
+const isEvidenceAcceptable = (visionResult) => {
+  if (!visionResult) return false;
+
+  const { labels, safeSearch } = visionResult;
+
+  // Blank / meaningless image
+  if (!labels || labels.length === 0) {
+    return false;
+  }
+
+  // Unsafe content
+  if (
+    safeSearch.adult === 'VERY_LIKELY' ||
+    safeSearch.violence === 'VERY_LIKELY'
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+
 const executeTask = async (data) => {
   console.log('🔥 executeTask called');
 
@@ -74,7 +98,9 @@ const executeTask = async (data) => {
   );
 
   if (distance > ALLOWED_RADIUS_METERS) {
-    throw new Error(`Execution location too far (${Math.round(distance)}m). Expected: [${commitment.location.lat}, ${commitment.location.lng}], Received: [${executionLocation.lat}, ${executionLocation.lng}]`);
+    throw new Error(
+      `Execution location too far (${Math.round(distance)}m)`
+    );
   }
 
   /* ------------------- 5. upload evidence ----------------------------- */
@@ -84,7 +110,6 @@ const executeTask = async (data) => {
     .digest('hex');
 
   const evidencePath = `evidences/${commitmentId}/${Date.now()}_${evidenceHash}`;
-
   const file = bucket.file(evidencePath);
 
   await file.save(evidenceFile.buffer, {
@@ -98,7 +123,19 @@ const executeTask = async (data) => {
     expires: '03-01-2030'
   });
 
-  /* ------------------- 6. generate PoE hash --------------------------- */
+  /* ------------------- 6. AI verification (Vision API) ---------------- */
+  const visionResult = await analyzeEvidenceImage(evidenceFile.buffer);
+  const evidenceValid = isEvidenceAcceptable(visionResult);
+
+  console.log(
+    '[VISION] Evidence valid:',
+    evidenceValid,
+    'Verdict:',
+    visionResult.verdict
+  );
+
+
+  /* ------------------- 7. generate PoE hash --------------------------- */
   const poeHash = generatePoEHash({
     commitmentId,
     timestamp: execTime.toISOString(),
@@ -107,9 +144,7 @@ const executeTask = async (data) => {
     evidenceHash
   });
 
-  console.log('[DEBUG] PoE hash:', poeHash);
-
-  /* ------------------- 7. create proof object ------------------------- */
+  /* ------------------- 8. create proof object ------------------------- */
   const proof = {
     poeHash,
     commitmentId,
@@ -121,11 +156,16 @@ const executeTask = async (data) => {
       path: evidencePath,
       mimeType: evidenceFile.mimetype
     },
-    status: 'PROOF_GENERATED',
+    aiVerification: {
+      vision: visionResult,
+      evidenceValid,
+      checkedAt: new Date().toISOString()
+    },
+    status: evidenceValid ? 'PROOF_GENERATED' : 'PROOF_SUSPICIOUS',
     createdAt: new Date().toISOString()
   };
-
-  /* ------------------- 8. store proof metadata ------------------------ */
+  
+  /* ------------------- 9. store proof metadata ------------------------ */
   await db.collection('proofs').doc(poeHash).set(proof);
 
   await db.collection('evidences').doc(evidenceHash).set({
@@ -133,13 +173,14 @@ const executeTask = async (data) => {
     poeHash,
     fileUrl,
     filePath: evidencePath,
+    aiVerdict: visionResult.verdict,
     uploadedAt: new Date().toISOString()
   });
 
-  /* ------------------- 9. anchor on blockchain ------------------------ */
+  /* ------------------- 10. anchor on blockchain ----------------------- */
   const { txHash } = await storeProofOnChain(commitmentId, poeHash);
 
-  /* ------------------- 10. return result ------------------------------ */
+  /* ------------------- 11. return result ------------------------------ */
   return {
     ...proof,
     blockchainTx: txHash
