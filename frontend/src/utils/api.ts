@@ -353,6 +353,7 @@ export interface VerifyProofResponse {
     time: boolean;
     location: boolean;
   };
+  aiExplanation?: string;
 }
 
 /**

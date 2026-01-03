@@ -158,7 +158,6 @@ const executeTask = async (data) => {
     },
     aiVerification: {
       vision: visionResult,
-      evidenceValid,
       checkedAt: new Date().toISOString()
     },
     status: evidenceValid ? 'PROOF_GENERATED' : 'PROOF_SUSPICIOUS',

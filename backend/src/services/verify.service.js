@@ -2,6 +2,7 @@ import { db } from '../config/firebase.js';
 import { generatePoEHash } from '../utils/crypto.js';
 import { getDistanceFromLatLonInMeters } from '../utils/geo.js';
 import { getProofFromChain } from '../blockchain/poeContract.js';
+import { generateVerificationExplanation } from './gemini.service.js';
 
 const ALLOWED_RADIUS_METERS = 200;
 
@@ -20,47 +21,32 @@ const parseUtc = (value) => {
  * @returns {object} Verification result
  */
 const verifyProof = async (poeHash) => {
-  // 1. Validate Input
   if (!poeHash) {
     throw new Error('Missing poeHash parameter');
   }
 
-  // 2. Fetch Proof from Firestore
-  const proofDoc = await db
-    .collection('proofs')
-    .doc(poeHash)
-    .get();
+  /* ------------------ fetch proof ------------------ */
+  const proofDoc = await db.collection('proofs').doc(poeHash).get();
 
   if (!proofDoc.exists) {
-    // DEBUG: Log all available IDs to see if there's a mismatch
-    const allProofsSnapshot = await db.collection('proofs').limit(10).get();
-    const availableIds = allProofsSnapshot.docs.map(d => d.id);
-    console.log(`[DEBUG] Proof ${poeHash} not found. Available IDs (first 10):`, availableIds);
-
-    return {
-      valid: false,
-      reason: 'Proof not found'
-    };
+    return { valid: false, reason: 'Proof not found' };
   }
 
   const proof = proofDoc.data();
 
-  // 3. Fetch Commitment from Firestore
+  /* ------------------ fetch commitment ------------------ */
   const commitmentDoc = await db
     .collection('commitments')
     .doc(proof.commitmentId)
     .get();
 
   if (!commitmentDoc.exists) {
-    return {
-      valid: false,
-      reason: 'Associated commitment not found'
-    };
+    return { valid: false, reason: 'Associated commitment not found' };
   }
 
   const commitment = commitmentDoc.data();
 
-  // 4. Recompute PoE hash
+  /* ------------------ recompute hash ------------------ */
   const recomputedHash = generatePoEHash({
     commitmentId: proof.commitmentId,
     timestamp: proof.executionTime,
@@ -70,63 +56,82 @@ const verifyProof = async (poeHash) => {
 
   const hashMatch = recomputedHash === poeHash;
 
-  // 5. Fetch on-chain hash
+  /* ------------------ blockchain check ------------------ */
   let onChainMatch = false;
   try {
     const chainProof = await getProofFromChain(proof.commitmentId);
     onChainMatch = recomputedHash === chainProof.poeHash;
   } catch {
-    return {
-      valid: false,
-      reason: 'Proof not anchored on blockchain'
-    };
+    onChainMatch = false;
   }
 
-  // 6. Validate Time (UTC-safe)
+  /* ------------------ time check ------------------ */
   const execTime = parseUtc(proof.executionTime);
   const startTime = parseUtc(commitment.timeWindow.start);
   const endTime = parseUtc(commitment.timeWindow.end);
-
   const timeValid = execTime >= startTime && execTime <= endTime;
 
-  // 7. Validate Location
+  /* ------------------ location check ------------------ */
   const distance = getDistanceFromLatLonInMeters(
     commitment.location.lat,
     commitment.location.lng,
     proof.executionLocation.lat,
     proof.executionLocation.lng
   );
-
   const locationValid = distance <= ALLOWED_RADIUS_METERS;
 
-  // 8. Final Decision
-  const isValid =
-    hashMatch &&
-    onChainMatch &&
-    timeValid &&
-    locationValid;
+  /* ------------------ final checks ------------------ */
+  const checks = {
+    hashMatch,
+    onChainMatch,
+    time: timeValid,
+    location: locationValid
+  };
 
-  if (!isValid) {
+  const deterministicValid =
+    hashMatch && onChainMatch && timeValid && locationValid;
+
+    const aiSuspicious =
+    proof.aiVerification?.vision?.evidenceValid === false ||
+    proof.aiVerification?.vision?.verdict === 'SUSPICIOUS';
+    console.log('[VERIFY] AI suspicious:', {
+      verdict: proof.aiVerification?.vision?.verdict,
+      evidenceValid: proof.aiVerification?.vision?.evidenceValid
+    });
+      
+  /* ------------------ Gemini explanation (ONLY when useful) ------------------ */
+  let explanation = null;
+
+  if (!deterministicValid || aiSuspicious) {
+    explanation = await generateVerificationExplanation({
+      vision: proof.aiVerification?.vision,
+      checks
+    });
+
+    // Optional: persist explanation for audits
+    await db.collection('proofs').doc(poeHash).update({
+      aiExplanation: {
+        provider: 'gemini',
+        summary: explanation,
+        generatedAt: new Date().toISOString()
+      }
+    });
+  }
+
+  /* ------------------ return ------------------ */
+  if (!deterministicValid) {
     return {
       valid: false,
       reason: 'Verification failed',
-      checks: {
-        hashMatch,
-        onChainMatch,
-        time: timeValid,
-        location: locationValid
-      }
+      checks,
+      aiExplanation: explanation
     };
   }
 
   return {
     valid: true,
-    checks: {
-      hashMatch,
-      onChainMatch,
-      time: timeValid,
-      location: locationValid
-    }
+    checks,
+    aiExplanation: explanation // may still exist if AI was suspicious
   };
 };
 

@@ -260,6 +260,52 @@ const VerifyExecutionProof = () => {
                 </div>
               </div>
             )}
+
+            {/* AI Verification Section */}
+            {verificationResult.aiExplanation && (
+              <div className="integrity-panel" style={{ marginTop: '0px', gridColumn: '1 / -1' }}>
+                <h3 className="integrity-title">AI Vision Analysis</h3>
+                <div className="integrity-items">
+                  <div className="integrity-item" style={{ width: '100%' }}>
+                    <div className="integrity-icon-wrapper">
+                      <Zap size={20} className="integrity-icon" />
+                      {/* Determine status based on validity or explanation text content? 
+                             The user example has valid: true but text says 'flagged as SUSPICIOUS'. 
+                             So we should rely on the text content or a dedicated flag if we had one.
+                             For now, let's assume if it mentions 'SUSPICIOUS' it's a warning/error.
+                         */}
+                      {!verificationResult.aiExplanation.includes('SUSPICIOUS') ? (
+                        <CheckCircle2 size={16} className="integrity-check" style={{ color: '#10b981' }} />
+                      ) : (
+                        <AlertCircle size={16} className="integrity-check" style={{ color: '#f59e0b' }} />
+                      )}
+                    </div>
+                    <div className="integrity-content">
+                      <span className="integrity-label">Vision Verdict</span>
+                      <span className="integrity-status" style={{
+                        color: !verificationResult.aiExplanation.includes('SUSPICIOUS') ? '#10b981' : '#f59e0b'
+                      }}>
+                        {!verificationResult.aiExplanation.includes('SUSPICIOUS') ? 'ACCEPTED' : 'FLAGGED'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '6px',
+                  borderLeft: '3px solid',
+                  borderColor: !verificationResult.aiExplanation.includes('SUSPICIOUS') ? '#10b981' : '#f59e0b',
+                  fontSize: '13px',
+                  lineHeight: '1.5',
+                  color: '#e5e7eb'
+                }}>
+                  {verificationResult.aiExplanation}
+                </div>
+              </div>
+            )}
+
           </div>
         )}
 
