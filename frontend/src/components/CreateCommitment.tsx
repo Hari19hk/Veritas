@@ -10,49 +10,12 @@ import {
   CheckCircle2,
   X
 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import './CreateCommitment.css';
 import { createCommitment } from '../utils/api';
+import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
 
-// Fix for default marker icons in Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
 
-// Custom green marker icon
-const greenIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiMxMGI5ODEiLz4KPC9zdmc+',
-  iconSize: [24, 24],
-  iconAnchor: [12, 24],
-  popupAnchor: [0, -24],
-});
 
-function MapController({ center }: { center: [number, number] }) {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(center, map.getZoom());
-  }, [center, map]);
-  return null;
-}
-
-function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
-  const map = useMap();
-  useEffect(() => {
-    const handleClick = (e: L.LeafletMouseEvent) => {
-      onMapClick(e.latlng.lat, e.latlng.lng);
-    };
-    map.on('click', handleClick);
-    return () => {
-      map.off('click', handleClick);
-    };
-  }, [map, onMapClick]);
-  return null;
-}
 
 const CreateCommitment = () => {
   const [taskIdentifier, setTaskIdentifier] = useState('');
@@ -69,6 +32,13 @@ const CreateCommitment = () => {
     timestamp: string;
   } | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  });
+  
+ 
+  
 
   // Refs for datetime inputs
   const startTimeInputRef = useRef<HTMLInputElement>(null);
@@ -321,24 +291,34 @@ const CreateCommitment = () => {
             )}
           </div>
           <div className="map-container">
-            <MapContainer
-              center={mapCenter}
-              zoom={13}
-              style={{ height: '100%', width: '100%', borderRadius: '6px' }}
-              className="leaflet-container-custom"
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker position={mapCenter} icon={greenIcon}>
-                <Popup>Target Location</Popup>
-              </Marker>
-              <MapController center={mapCenter} />
-              <MapClickHandler
-                onMapClick={(lat, lng) => setMapCenter([lat, lng])}
-              />
-            </MapContainer>
+          <div className="map-container">
+            {!isLoaded ? (
+              <div className="map-loading">Loading map…</div>
+            ) : (
+              <GoogleMap
+                center={{ lat: mapCenter[0], lng: mapCenter[1] }}
+                zoom={13}
+                mapContainerStyle={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '6px',
+                }}
+                onClick={(e) => {
+                  if (e.latLng) {
+                    setMapCenter([e.latLng.lat(), e.latLng.lng()]);
+                  }
+                }}
+                options={{
+                  disableDefaultUI: true,
+                  zoomControl: true,
+                }}
+              >
+                <Marker position={{ lat: mapCenter[0], lng: mapCenter[1] }} />
+              </GoogleMap>
+            )}
+          </div>
+
+
             <div className="map-controls">
               <button
                 className="map-control-btn"
