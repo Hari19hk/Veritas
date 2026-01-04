@@ -10,10 +10,13 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Bell,
-  Settings,
-  FileText
+  FileText,
+  Shield,
+  LogOut,
+  ShieldCheck
 } from 'lucide-react';
+import { auth } from '../firebase/firebase';
+import { signOut } from 'firebase/auth';
 import './Dashboard.css';
 
 interface LayoutProps {
@@ -26,6 +29,15 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -61,11 +73,11 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
       {/* Top Header Bar */}
       <header className="dashboard-header">
         <div className="header-left">
-          <div className="logo-section">
+          <div className="logo-section" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <div className="logo-icon">
-              <span className="logo-ai-text">AI</span>
+              <Shield size={20} color="#10b981" fill="#10b981" fillOpacity={0.2} />
             </div>
-            <h1 className="logo-text">CONSOLE</h1>
+            <h1 className="logo-text">BlockShi</h1>
           </div>
           <div className="breadcrumb">
             <span>console</span>
@@ -97,15 +109,6 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
           </form>
         </div>
         <div className="header-right">
-          <div className="header-icons">
-            <button className="icon-btn">
-              <Bell size={20} />
-              <span className="notification-dot"></span>
-            </button>
-            <button className="icon-btn">
-              <Settings size={20} />
-            </button>
-          </div>
           <div className="user-info">
             <div className="user-details">
               <span className="user-label">Executor</span>
@@ -113,6 +116,9 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
             </div>
             <User size={18} className="user-icon" />
           </div>
+          <button className="logout-btn" onClick={handleLogout} title="Sign Out">
+            <LogOut size={18} />
+          </button>
         </div>
       </header>
 
@@ -156,6 +162,13 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
             >
               <FileText size={20} />
               {!sidebarCollapsed && <span>Execution Logs</span>}
+            </Link>
+            <Link
+              to="/verify"
+              className={`nav-item ${isActive('/verify') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
+            >
+              <ShieldCheck size={20} />
+              {!sidebarCollapsed && <span>Verify Proof</span>}
             </Link>
           </nav>
 

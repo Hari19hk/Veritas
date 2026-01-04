@@ -298,6 +298,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow: visible;
 }
 
 .form-row {
@@ -348,17 +349,82 @@
   position: relative;
   display: flex;
   align-items: center;
+  overflow: visible;
 }
 
 .time-icon {
   position: absolute;
   left: 12px;
   color: #6b7280;
-  pointer-events: none;
+  pointer-events: auto;
+  transition: color 0.2s, transform 0.2s;
+  z-index: 1;
+}
+
+.time-icon:hover {
+  color: #10b981;
+  transform: scale(1.1);
 }
 
 .time-input {
   padding-left: 36px;
+  padding-right: 8px !important;
+  min-width: 0;
+  width: 100%;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: 12px !important;
+  letter-spacing: 0.5px;
+}
+
+/* Custom datetime-local input styling */
+input[type="datetime-local"] {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+/* Style the calendar dropdown */
+input[type="datetime-local"]::-webkit-datetime-edit {
+  padding: 0 4px 0 0;
+  color: #e5e7eb;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0 4px 0 0;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-text {
+  color: #6b7280;
+  padding: 0 1px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
+  color: #e5e7eb;
+  padding: 2px 1px;
+  border-radius: 2px;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-month-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field:focus,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field:focus {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  outline: none;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+  color: #10b981;
+  padding: 2px 4px 2px 1px;
 }
 
 /* Warning Box */

@@ -12,7 +12,6 @@ import Settings from './components/Settings';
 
 import DashboardShell from './components/DashboardShell';
 import RequireAuth from './auth/RequireAuth.tsx';
-import Login from './components/Login.tsx';
 
 function App() {
   return (
@@ -20,7 +19,6 @@ function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/verify" element={<VerifyExecutionProof />} />
         <Route path="/proof/:proofId" element={<ProofOfExecution />} />
 
@@ -33,7 +31,7 @@ function App() {
                 <Dashboard />
               </DashboardShell>
             </RequireAuth>
-            
+
           }
         />
 
@@ -45,9 +43,11 @@ function App() {
                 <CreateCommitment />
               </DashboardShell>
             </RequireAuth>
-           
+
           }
         />
+
+
 
         <Route
           path="/app/execute-task"
@@ -57,7 +57,7 @@ function App() {
                 <ExecuteTask />
               </DashboardShell>
             </RequireAuth>
-           
+
           }
         />
 
@@ -69,7 +69,7 @@ function App() {
                 <Logs />
               </DashboardShell>
             </RequireAuth>
-            
+
           }
         />
 
@@ -81,7 +81,7 @@ function App() {
                 <Settings />
               </DashboardShell>
             </RequireAuth>
-           
+
           }
         />
       </Routes>

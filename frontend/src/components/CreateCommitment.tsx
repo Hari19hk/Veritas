@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   MapPin,
   Rocket,
@@ -69,6 +69,10 @@ const CreateCommitment = () => {
     timestamp: string;
   } | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  // Refs for datetime inputs
+  const startTimeInputRef = useRef<HTMLInputElement>(null);
+  const endTimeInputRef = useRef<HTMLInputElement>(null);
 
   // Handle coordinate input changes and update map
   const handleLatitudeChange = (value: string) => {
@@ -143,19 +147,10 @@ const CreateCommitment = () => {
       newErrors.endTime = 'End time is required';
     }
 
-    // Validate date format (basic check)
-    const dateRegex = /^\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}$/;
-    if (startTime && !dateRegex.test(startTime)) {
-      newErrors.startTime = 'Format: mm/dd/yyyy, HH:MM';
-    }
-    if (endTime && !dateRegex.test(endTime)) {
-      newErrors.endTime = 'Format: mm/dd/yyyy, HH:MM';
-    }
-
     // Check if end time is after start time
-    if (startTime && endTime && dateRegex.test(startTime) && dateRegex.test(endTime)) {
-      const start = new Date(startTime.replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2})/, '$3-$1-$2T$4:$5'));
-      const end = new Date(endTime.replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2})/, '$3-$1-$2T$4:$5'));
+    if (startTime && endTime) {
+      const start = new Date(startTime);
+      const end = new Date(endTime);
       if (end <= start) {
         newErrors.endTime = 'End time must be after start time';
       }
@@ -175,14 +170,9 @@ const CreateCommitment = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Convert date format from "mm/dd/yyyy, HH:MM" to ISO string
+  // Convert datetime-local format to ISO string
   const convertToISO = (dateString: string): string => {
-    const match = dateString.match(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2})/);
-    if (!match) {
-      throw new Error('Invalid date format');
-    }
-    const [, month, day, year, hour, minute] = match;
-    return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).toISOString();
+    return new Date(dateString).toISOString();
   };
 
   const handleCommit = async () => {
@@ -245,8 +235,8 @@ const CreateCommitment = () => {
         commitmentId: response.commitmentId,
         taskIdentifier,
         missionBrief,
-        startTime,
-        endTime,
+        startTime: startISO,
+        endTime: endISO,
         location: {
           lat: finalLat,
           lng: finalLng,
@@ -425,11 +415,16 @@ const CreateCommitment = () => {
               <div className="form-group">
                 <label className="form-label">START TIME</label>
                 <div className="time-input-wrapper">
-                  <Calendar size={16} className="time-icon" />
+                  <Calendar
+                    size={16}
+                    className="time-icon"
+                    onClick={() => startTimeInputRef.current?.showPicker()}
+                    style={{ cursor: 'pointer' }}
+                  />
                   <input
-                    type="text"
+                    ref={startTimeInputRef}
+                    type="datetime-local"
                     className={`form-input time-input ${errors.startTime ? 'error' : ''}`}
-                    placeholder="mm/dd/yyyy, HH:MM"
                     value={startTime}
                     onChange={(e) => {
                       setStartTime(e.target.value);
@@ -446,11 +441,16 @@ const CreateCommitment = () => {
               <div className="form-group">
                 <label className="form-label">END TIME</label>
                 <div className="time-input-wrapper">
-                  <Clock size={16} className="time-icon" />
+                  <Clock
+                    size={16}
+                    className="time-icon"
+                    onClick={() => endTimeInputRef.current?.showPicker()}
+                    style={{ cursor: 'pointer' }}
+                  />
                   <input
-                    type="text"
+                    ref={endTimeInputRef}
+                    type="datetime-local"
                     className={`form-input time-input ${errors.endTime ? 'error' : ''}`}
-                    placeholder="mm/dd/yyyy, HH:MM"
                     value={endTime}
                     onChange={(e) => {
                       setEndTime(e.target.value);
