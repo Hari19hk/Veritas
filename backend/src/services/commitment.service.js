@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { db } from '../config/firebase.js';
-
+import { logCommitmentCreated } from './analytics.service.js';
 /**
  * Creates a new task commitment
  * @param {object} data
@@ -39,6 +39,17 @@ export const createCommitment = async (data) => {
     .collection('commitments')
     .doc(commitmentId)
     .set(commitment);
+
+  // bigquery analytics
+  logCommitmentCreated({
+    commitmentId,
+    taskName,
+    lat: location.lat,
+    lng: location.lng,
+    startTime: timeWindow.start,
+    endTime: timeWindow.end,
+    createdAt: commitment.createdAt,
+  });
 
   return commitment;
 };

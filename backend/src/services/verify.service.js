@@ -3,6 +3,7 @@ import { generatePoEHash } from '../utils/crypto.js';
 import { getDistanceFromLatLonInMeters } from '../utils/geo.js';
 import { getProofFromChain } from '../blockchain/poeContract.js';
 import { generateVerificationExplanation } from './gemini.service.js';
+import { logVerificationResult } from './analytics.service.js';
 
 const ALLOWED_RADIUS_METERS = 200;
 
@@ -117,6 +118,40 @@ const verifyProof = async (poeHash) => {
       }
     });
   }
+
+
+  /* ------------------ risk classification ------------------ */
+  const riskLevel =
+    !deterministicValid ? 'HIGH' :
+    aiSuspicious ? 'MEDIUM' :
+    'LOW';
+
+  /* ------------------ log analytics ------------------ */
+  await logVerificationResult({
+    poeHash,
+    commitmentId: proof.commitmentId,
+    verifiedAt,
+  
+    verificationValid: deterministicValid,
+    deterministicValid,
+    aiSuspicious,
+    aiExplanationUsed,
+  
+    hashMatch,
+    onChainMatch,
+    timeValid,
+    locationValid,
+  
+    distanceMeters,
+    distanceBucket,
+    timeDriftSeconds,
+  
+    visionVerdict: proof.aiVerification?.vision?.verdict || 'UNKNOWN',
+    evidenceValid: proof.aiVerification?.vision?.evidenceValid ?? null,
+  
+    riskLevel
+  });
+  
 
   /* ------------------ return ------------------ */
   if (!deterministicValid) {

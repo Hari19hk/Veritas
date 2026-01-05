@@ -4,7 +4,7 @@ import { generatePoEHash } from '../utils/crypto.js';
 import { getDistanceFromLatLonInMeters } from '../utils/geo.js';
 import { storeProofOnChain } from '../blockchain/poeContract.js';
 import { analyzeEvidenceImage } from './vision.service.js';
-
+import { logExecutionEvent, logAISignals } from './analytics.service.js';
 const bucket = storage.bucket(); // Uses default bucket from config
 
 const ALLOWED_RADIUS_METERS = 200; // MVP constraint
@@ -174,6 +174,31 @@ const executeTask = async (data) => {
     filePath: evidencePath,
     aiVerdict: visionResult.verdict,
     uploadedAt: new Date().toISOString()
+  });
+
+  // BigQuery analytics
+  logExecutionEvent({
+    poeHash,
+    commitmentId,
+    executedAt: execTime.toISOString(),
+    locationDistanceMeters: Math.round(distance),
+    locationValid,
+    timeValid,
+    evidenceHash
+  });
+
+  // AI analytics
+  logAISignals({
+    poeHash,
+    visionVerdict: visionResult.verdict,
+    evidenceValid,
+    labelCount: visionResult.labels?.length || 0,
+    dominantColorScore:
+      visionResult.imageProperties?.dominantColors?.[0]?.score || 0,
+    hasText: Boolean(visionResult.extractedText),
+    safeAdult: visionResult.safeSearch?.adult,
+    safeViolence: visionResult.safeSearch?.violence,
+    checkedAt: new Date().toISOString()
   });
 
   /* ------------------- 10. anchor on blockchain ----------------------- */
