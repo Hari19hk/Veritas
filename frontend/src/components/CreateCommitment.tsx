@@ -25,6 +25,7 @@ const CreateCommitment = () => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([34.0522, -118.2437]);
   const [latitudeInput, setLatitudeInput] = useState('34.0522');
   const [longitudeInput, setLongitudeInput] = useState('-118.2437');
+  const [radiusInput, setRadiusInput] = useState('200');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [commitmentData, setCommitmentData] = useState<{
@@ -136,6 +137,11 @@ const CreateCommitment = () => {
       newErrors.longitude = 'Longitude must be between -180 and 180';
     }
 
+    const rad = parseFloat(radiusInput);
+    if (isNaN(rad) || rad <= 0) {
+      newErrors.radius = 'Radius must be a positive number';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -164,6 +170,7 @@ const CreateCommitment = () => {
       // Use validated coordinates
       const finalLat = parseFloat(latitudeInput);
       const finalLng = parseFloat(longitudeInput);
+      const FinalRadius = parseFloat(radiusInput);
 
       // Convert dates to ISO format
       const startISO = convertToISO(startTime);
@@ -178,6 +185,7 @@ const CreateCommitment = () => {
         location: {
           lat: finalLat,
           lng: finalLng,
+          radius: FinalRadius,
         },
         timeWindow: {
           start: startISO,
@@ -283,11 +291,30 @@ const CreateCommitment = () => {
               />
               <span className="coordinate-direction">{mapCenter[1] >= 0 ? 'E' : 'W'}</span>
             </div>
+            <span className="coord-separator">/</span>
+            <div className="coordinate-input-group">
+              <label className="coordinate-label">RAD (M):</label>
+              <input
+                type="text"
+                className={`coordinate-input ${errors.radius ? 'error' : ''}`}
+                value={radiusInput}
+                onChange={(e) => {
+                  setRadiusInput(e.target.value);
+                  if (errors.radius) {
+                    setErrors({ ...errors, radius: '' });
+                  }
+                }}
+                placeholder="200"
+              />
+            </div>
             {errors.latitude && (
               <span className="error-message coordinate-error">{errors.latitude}</span>
             )}
             {errors.longitude && (
               <span className="error-message coordinate-error">{errors.longitude}</span>
+            )}
+             {errors.radius && (
+              <span className="error-message coordinate-error">{errors.radius}</span>
             )}
           </div>
           <div className="map-container">

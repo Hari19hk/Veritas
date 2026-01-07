@@ -96,10 +96,15 @@ const executeTask = async (data) => {
     executionLocation.lat,
     executionLocation.lng
   );
+  
+  // Use radius from commitment, or configured default
+  const allowedRadius = commitment.location.radius || ALLOWED_RADIUS_METERS;
 
-  if (distance > ALLOWED_RADIUS_METERS) {
+  console.log(`[PROOF] Distance: ${distance}m, Allowed: ${allowedRadius}m`);
+
+  if (distance > allowedRadius) {
     throw new Error(
-      `Execution location too far (${Math.round(distance)}m)`
+      `Execution location too far (${Math.round(distance)}m). Max allowed: ${allowedRadius}m`
     );
   }
 

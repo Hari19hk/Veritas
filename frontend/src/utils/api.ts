@@ -5,6 +5,7 @@ export interface CreateCommitmentRequest {
   location: {
     lat: number;
     lng: number;
+    radius: number;
   };
   timeWindow: {
     start: string;
@@ -21,6 +22,7 @@ export interface CreateCommitmentResponse {
     location: {
       lat: number;
       lng: number;
+      radius: number;
     };
     timeWindow: {
       start: string;

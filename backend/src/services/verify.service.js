@@ -79,7 +79,9 @@ const verifyProof = async (poeHash) => {
     proof.executionLocation.lat,
     proof.executionLocation.lng
   );
-  const locationValid = distance <= ALLOWED_RADIUS_METERS;
+  
+  const allowedRadius = commitment.location.radius || ALLOWED_RADIUS_METERS;
+  const locationValid = distance <= allowedRadius;
 
   /* ------------------ final checks ------------------ */
   const checks = {

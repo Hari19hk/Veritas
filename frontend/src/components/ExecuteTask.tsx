@@ -190,6 +190,32 @@ const ExecuteTask = () => {
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const getGeolocation = () => {
+    if (!navigator.geolocation) {
+      setApiError('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsSearching(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setCoordinates({ lat: latitude, lng: longitude });
+        setLatitudeInput(latitude.toFixed(6));
+        setLongitudeInput(longitude.toFixed(6));
+        setIsSearching(false);
+        // Clear manual location input if geo was successful
+        setLocationInput(''); 
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        setApiError('Failed to get location: ' + error.message);
+        setIsSearching(false);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
+
   // Geocoding function to convert location name to coordinates
   useEffect(() => {
     if (searchTimeoutRef.current) {
@@ -492,7 +518,27 @@ const ExecuteTask = () => {
             {/* Manual Coordinate Entry */}
             <div className="info-card">
               <div className="card-header">
-                <h3 className="card-title">MANUAL COORDINATE ENTRY</h3>
+                <h3 className="card-title">COORDINATE ENTRY</h3>
+                <button 
+                  onClick={getGeolocation}
+                  className="gps-btn"
+                  title="Use Current GPS Location"
+                  style={{
+                    background: 'none',
+                    border: '1px solid #374151',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    color: '#60a5fa',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Target size={12} />
+                  GPS
+                </button>
               </div>
               <div className="card-content">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -559,6 +605,12 @@ const ExecuteTask = () => {
                 <h3 className="card-title">CURRENT COORDINATE</h3>
               </div>
               <div className="card-content">
+                  {selectedCommitmentId ? (() => {
+                      const selected = commitments.find(c => c.commitmentId === selectedCommitmentId);
+                      const radius = (selected?.location as any)?.radius || 200;
+                      return `Target Radius: ${radius}m`;
+                    })() : 'Select Commitment'}
+                  
                 <div className="coordinate-display">
                   <Target size={16} className="coordinate-icon" />
                   <span className="coordinate-text">
