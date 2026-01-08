@@ -7,7 +7,6 @@
 ## 🚨 Problem Statement
 
 In an increasingly automated world, **trust is defined by opacity**:
-*   **AI Black Boxes**: Enterprises trust model outputs without knowing if the correct model or data was actually used.
 *   **Physical Verification Gap**: Logistics and gig-economy platforms rely on easily spoofable GPS data.
 *   **Lack of Auditability**: Current solutions rely on centralized logs that can be tampered with or retroactively edited.
 
@@ -23,7 +22,7 @@ By combining Trusted Execution environments (simulated), Geofencing, and AI-powe
 
 ### 🛠 Google Technologies Used
 
-*   **Google Gemini 1.5 Pro**: Acts as the "Supreme Judge" for complex verification logic, explaining *why* a proof is valid or suspicious in plain English.
+*   **Google Gemini**: Acts as the "Supreme Judge" for complex verification logic, explaining *why* a proof is valid or suspicious in plain English.
 *   **Google Cloud Firestore**: High-performance NoSQL database for real-time synchronization of tasks and proofs.
 *   **Firebase Authentication**: Secure, drop-in identity solution ensuring only authorized peers can commit tasks.
 *   **Google Cloud Storage**: Secure, scalable object storage for evidence images and immutable audit trails.
