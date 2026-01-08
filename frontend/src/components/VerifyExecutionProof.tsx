@@ -4,7 +4,6 @@ import {
   MapPin,
   Clock,
   Terminal,
-  Activity,
   Globe,
   Zap,
   Wallet,

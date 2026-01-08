@@ -96,7 +96,7 @@ const executeTask = async (data) => {
     executionLocation.lat,
     executionLocation.lng
   );
-  
+
   // Use radius from commitment, or configured default
   const allowedRadius = commitment.location.radius || ALLOWED_RADIUS_METERS;
 
@@ -168,7 +168,7 @@ const executeTask = async (data) => {
     status: evidenceValid ? 'PROOF_GENERATED' : 'PROOF_SUSPICIOUS',
     createdAt: new Date().toISOString()
   };
-  
+
   /* ------------------- 9. store proof metadata ------------------------ */
   await db.collection('proofs').doc(poeHash).set(proof);
 
@@ -181,8 +181,15 @@ const executeTask = async (data) => {
     uploadedAt: new Date().toISOString()
   });
 
+  /* ------------------- 11. log analytics ----------------------------- */
+  console.log('[PROOF] Logging execution event to BigQuery...');
+
+  // Explicitly define validity booleans for logging (since we threw errors if false)
+  const locationValid = true;
+  const timeValid = true;
+
   // BigQuery analytics
-  logExecutionEvent({
+  await logExecutionEvent({
     poeHash,
     commitmentId,
     executedAt: execTime.toISOString(),
@@ -192,8 +199,10 @@ const executeTask = async (data) => {
     evidenceHash
   });
 
+  console.log('[PROOF] Logging AI signals to BigQuery...');
+
   // AI analytics
-  logAISignals({
+  await logAISignals({
     poeHash,
     visionVerdict: visionResult.verdict,
     evidenceValid,

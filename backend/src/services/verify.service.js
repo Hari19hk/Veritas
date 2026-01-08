@@ -79,7 +79,7 @@ const verifyProof = async (poeHash) => {
     proof.executionLocation.lat,
     proof.executionLocation.lng
   );
-  
+
   const allowedRadius = commitment.location.radius || ALLOWED_RADIUS_METERS;
   const locationValid = distance <= allowedRadius;
 
@@ -94,14 +94,14 @@ const verifyProof = async (poeHash) => {
   const deterministicValid =
     hashMatch && onChainMatch && timeValid && locationValid;
 
-    const aiSuspicious =
+  const aiSuspicious =
     proof.aiVerification?.vision?.evidenceValid === false ||
     proof.aiVerification?.vision?.verdict === 'SUSPICIOUS';
-    console.log('[VERIFY] AI suspicious:', {
-      verdict: proof.aiVerification?.vision?.verdict,
-      evidenceValid: proof.aiVerification?.vision?.evidenceValid
-    });
-      
+  console.log('[VERIFY] AI suspicious:', {
+    verdict: proof.aiVerification?.vision?.verdict,
+    evidenceValid: proof.aiVerification?.vision?.evidenceValid
+  });
+
   /* ------------------ Gemini explanation (ONLY when useful) ------------------ */
   let explanation = null;
 
@@ -125,35 +125,48 @@ const verifyProof = async (poeHash) => {
   /* ------------------ risk classification ------------------ */
   const riskLevel =
     !deterministicValid ? 'HIGH' :
-    aiSuspicious ? 'MEDIUM' :
-    'LOW';
+      aiSuspicious ? 'MEDIUM' :
+        'LOW';
 
   /* ------------------ log analytics ------------------ */
+  const verifiedAt = new Date().toISOString();
+  // Calculate final distance for logging (if not already done in flow)
+  const distanceMeters = Math.round(distance);
+  const distanceBucket =
+    distance <= 20 ? 'EXACT' :
+      distance <= 50 ? 'CLOSE' :
+        distance <= 200 ? 'VALID' :
+          'FAR';
+
+  const timeDriftSeconds = Math.round((execTime.getTime() - startTime.getTime()) / 1000);
+
+  console.log('[VERIFY] Logging verification result to BigQuery...');
+
   await logVerificationResult({
     poeHash,
     commitmentId: proof.commitmentId,
     verifiedAt,
-  
+
     verificationValid: deterministicValid,
     deterministicValid,
     aiSuspicious,
-    aiExplanationUsed,
-  
+    aiExplanationUsed: !!explanation,
+
     hashMatch,
     onChainMatch,
     timeValid,
     locationValid,
-  
+
     distanceMeters,
     distanceBucket,
     timeDriftSeconds,
-  
+
     visionVerdict: proof.aiVerification?.vision?.verdict || 'UNKNOWN',
     evidenceValid: proof.aiVerification?.vision?.evidenceValid ?? null,
-  
+
     riskLevel
   });
-  
+
 
   /* ------------------ return ------------------ */
   if (!deterministicValid) {

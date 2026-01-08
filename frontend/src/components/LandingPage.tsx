@@ -136,7 +136,7 @@ const Landing = () => {
       <nav className="navbar">
         <div className="nav-brand">
           <Shield className="text-green-500" size={24} />
-          <span>BlockShi</span>
+          <span>Veritas</span>
         </div>
         <div className="nav-links">
           <a href="#features" className="nav-link">Features</a>
@@ -165,14 +165,15 @@ const Landing = () => {
         <div className="hero-content">
           <div className="hero-pill">
             <span className="pill-dot"></span>
-            ✨ Re-imagining AI Trust
+            ✨ Re‑imagining trust in real‑world task verification
           </div>
           <h1 className="hero-title">
             Proof of <span className="text-gradient">Execution</span>
           </h1>
           <p className="hero-subtitle">
-            The enterprise standard for AI workload integrity.
-            Generate immutable proofs for every compute cycle.
+            A cryptographic system to verify that real‑world tasks were actually completed at the right place, at the right time, with tamper‑proof evidence.
+
+
           </p>
 
           <div className="hero-buttons">
@@ -348,7 +349,7 @@ const Landing = () => {
       <footer className="footer">
         <div className="footer-content">
           <div>
-            &copy; 2026 BlockShi. All rights reserved.
+            &copy; 2026 Veritas. All rights reserved.
           </div>
           <div className="footer-links">
             <a href="#">Privacy Policy</a>
@@ -369,7 +370,7 @@ const Landing = () => {
               <div className="login-logo">
                 <Shield size={40} className="text-green-500" />
               </div>
-              <h2 className="login-title">Welcome to BlockShi</h2>
+              <h2 className="login-title">Welcome to Veritas</h2>
               <p className="login-subtitle">Secure your AI infrastructure with Proof of Execution.</p>
 
               <button

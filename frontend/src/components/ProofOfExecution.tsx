@@ -25,7 +25,6 @@ const ProofOfExecution = () => {
 
   // Get poeHash from URL params or use selected one
   const poeHashFromUrl = searchParams.get('poeHash');
-  const activePoeHash = poeHashFromUrl || selectedPoeHash;
 
   useEffect(() => {
     const loadProofs = async () => {

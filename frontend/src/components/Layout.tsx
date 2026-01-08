@@ -12,8 +12,7 @@ import {
   ChevronRight,
   FileText,
   Shield,
-  LogOut,
-  ShieldCheck
+  LogOut
 } from 'lucide-react';
 import { auth } from '../firebase/firebase';
 import { signOut } from 'firebase/auth';
@@ -77,7 +76,7 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
             <div className="logo-icon">
               <Shield size={20} color="#10b981" fill="#10b981" fillOpacity={0.2} />
             </div>
-            <h1 className="logo-text">BlockShi</h1>
+            <h1 className="logo-text">Veritas</h1>
           </div>
           <div className="breadcrumb">
             <span>console</span>
@@ -163,13 +162,7 @@ const Layout = ({ children, breadcrumb = 'dashboard' }: LayoutProps) => {
               <FileText size={20} />
               {!sidebarCollapsed && <span>Execution Logs</span>}
             </Link>
-            <Link
-              to="/verify"
-              className={`nav-item ${isActive('/verify') ? 'active' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}
-            >
-              <ShieldCheck size={20} />
-              {!sidebarCollapsed && <span>Verify Proof</span>}
-            </Link>
+
           </nav>
 
           <div className="sidebar-status">
