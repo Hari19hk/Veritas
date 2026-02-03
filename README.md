@@ -1,3 +1,5 @@
+
+https://github.com/user-attachments/assets/5ba283f5-b5e0-4cb1-b168-31db7f4ef829
 # Veritas | Re-imagining Trust in Real-World Tasks
 
 **Veritas** is a decentralized verification protocol that allows enterprises to cryptographically verify that real-world tasks—from AI computations to physical logistics—were executed correctly, at the right location, and within the required timeframe.
@@ -20,6 +22,7 @@ We need a system where **verification is intrinsic**, relying on math and crypto
 
 By combining Trusted Execution environments (simulated), Geofencing, and AI-powered evidence analysis, we generate an immutable proof anchored on the blockchain. This allows anyone to verify the integrity of a task **without needing to trust the executor**.
 
+https://github.com/user-attachments/assets/ee8ba1e2-96cb-4e2a-94aa-c35524517b34
 Live video demo :  https://drive.google.com/file/d/1H8LgfHFExOekvyQuVP1XkVu1CgOg5TXo/view?usp=drive_link
 
 ### 🛠 Google Technologies Used
