@@ -20,6 +20,8 @@ We need a system where **verification is intrinsic**, relying on math and crypto
 
 By combining Trusted Execution environments (simulated), Geofencing, and AI-powered evidence analysis, we generate an immutable proof anchored on the blockchain. This allows anyone to verify the integrity of a task **without needing to trust the executor**.
 
+Live video demo :  https://drive.google.com/file/d/1H8LgfHFExOekvyQuVP1XkVu1CgOg5TXo/view?usp=drive_link
+
 ### 🛠 Google Technologies Used
 
 *   **Google Gemini**: Acts as the "Supreme Judge" for complex verification logic, explaining *why* a proof is valid or suspicious in plain English.
@@ -85,3 +87,5 @@ By combining Trusted Execution environments (simulated), Geofencing, and AI-powe
     cd backend
     npx hardhat run scripts/deploy.cjs --network localhost
     ```
+
+    
